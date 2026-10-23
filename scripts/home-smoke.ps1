@@ -14,45 +14,45 @@ function Test-Endpoint {
             throw "HTTP $($response.StatusCode)"
         }
         if ($Validate) { & $Validate $response }
-        Write-Host "[OK] $Name — HTTP 200" -ForegroundColor Green
+        Write-Host "[OK] $Name - HTTP 200" -ForegroundColor Green
     } catch {
         $script:failures++
-        Write-Host "[FALHA] $Name — $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[FALHA] $Name - $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 
 $BaseUrl = $BaseUrl.TrimEnd("/")
 $BackendUrl = $BackendUrl.TrimEnd("/")
 
-Test-Endpoint "Página inicial" $BaseUrl {
+Test-Endpoint "Pagina inicial" $BaseUrl {
     param($response)
-    if ($response.Content -notmatch '<div id="root"></div>') {
-        throw "HTML inicial inesperado: root React não encontrado."
+    if ($response.Content -notmatch 'id=["'']root["'']') {
+        throw "HTML inicial inesperado: root React nao encontrado."
     }
 }
 
-Test-Endpoint "Saúde da API" "$BackendUrl/actuator/health" {
+Test-Endpoint "Saude da API" "$BackendUrl/actuator/health" {
     param($response)
     $body = $response.Content | ConvertFrom-Json
-    if ($body.status -ne "UP") { throw "API não está UP." }
+    if ($body.status -ne "UP") { throw "API nao esta UP." }
 }
 
-Test-Endpoint "Catálogo pelo Nginx" "$BaseUrl/api/v1/courses?page=0&size=6" {
+Test-Endpoint "Catalogo pelo Nginx" "$BaseUrl/api/v1/courses?page=0&size=6" {
     param($response)
     $body = $response.Content | ConvertFrom-Json
     if ($null -eq $body.content -or $null -eq $body.totalElements) {
-        throw "Resposta do catálogo sem os campos esperados."
+        throw "Resposta do catalogo sem os campos esperados."
     }
 }
 
 Test-Endpoint "Busca pelo Nginx" "$BaseUrl/api/v1/courses?q=Java&page=0&size=6" {
     param($response)
     $body = $response.Content | ConvertFrom-Json
-    if ($null -eq $body.content) { throw "Resposta da busca inválida." }
+    if ($null -eq $body.content) { throw "Resposta da busca invalida." }
 }
 
 if ($failures -gt 0) {
-    Write-Host "Smoke test: $failures verificação(ões) com falha." -ForegroundColor Red
+    Write-Host "Smoke test: $failures verificacao(oes) com falha." -ForegroundColor Red
     exit 1
 }
-Write-Host "Smoke test básico aprovado. Ainda é necessário validar visual, autenticação e matrícula manualmente." -ForegroundColor Green
+Write-Host "Smoke test basico aprovado. Ainda e necessario validar visual, autenticacao e matricula manualmente." -ForegroundColor Green
