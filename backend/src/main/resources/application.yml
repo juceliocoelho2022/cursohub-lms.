@@ -18,6 +18,10 @@ spring:
     locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
 server:
   port: ${PORT:8080}
+security:
+  jwt:
+    issuer: cursohub-api
+    secret-base64: ${JWT_SECRET_BASE64:}
 management:
   endpoints:
     web:

@@ -24,6 +24,7 @@ services:
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-cursohub}
       DB_USER: ${POSTGRES_USER:-cursohub}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Crie um arquivo .env com POSTGRES_PASSWORD}
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:?Configure JWT_SECRET_BASE64 no arquivo .env}
       FLYWAY_LOCATIONS: classpath:db/migration,classpath:db/demo
     depends_on:
       db:
