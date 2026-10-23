@@ -241,5 +241,100 @@ jobs:
 
           echo 'Smoke test OK: aulas autenticadas, isoladas por matricula e conclusao idempotente.'
 
+          # Estudio do instrutor. Não há cadastro público de instrutor.
+          # No banco isolado do CI, um usuário de teste é promovido de forma controlada.
+          docker exec -i "$POSTGRES_CONTAINER" psql -X -U cursohub -d cursohub_ci -v ON_ERROR_STOP=1 <<SQL
+          UPDATE app_users SET role = 'INSTRUCTOR'
+           WHERE email = 'segunda.aluna@example.com' AND role = 'STUDENT';
+          SQL
+
+          code=$(curl -sS -o /tmp/instructor-login.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"segunda.aluna@example.com","password":"SenhaForteCI#2026"}' \
+            http://localhost:8080/api/v1/auth/login)
+          [[ "$code" == "200" ]] || { echo "Login instrutor: $code"; exit 1; }
+          jq -e '.role == "INSTRUCTOR"' /tmp/instructor-login.json >/dev/null
+          INSTRUCTOR_TOKEN=$(jq -r '.accessToken' /tmp/instructor-login.json)
+          INSTRUCTOR_URL="http://localhost:8080/api/v1/instructor/courses"
+
+          code=$(curl -sS -o /tmp/instructor-denied.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" "$INSTRUCTOR_URL")
+          [[ "$code" == "403" ]] || { echo "Aluno acessou instrutor: $code (esperado 403)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/new-course.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{"slug":"curso-publicado-instrutor-ci","title":"Curso do Instrutor CI","description":"Curso criado pelo fluxo seguro de autoria","category":"Programação","level":"INICIANTE","estimatedMinutes":90}' \
+            "$INSTRUCTOR_URL")
+          [[ "$code" == "201" ]] || { echo "Criar curso rascunho: $code"; cat /tmp/new-course.json; exit 1; }
+          jq -e '.status == "RASCUNHO"' /tmp/new-course.json >/dev/null
+          OWN_COURSE_ID=$(jq -r '.id' /tmp/new-course.json)
+
+          # Não é possível publicar um curso sem aula obrigatória.
+          code=$(curl -sS -o /tmp/publish-empty.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/publish")
+          [[ "$code" == "409" ]] || { echo "Publicação sem aulas: $code (esperado 409)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/new-module.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{"title":"Introdução ao Curso"}' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/modules")
+          [[ "$code" == "201" ]] || { echo "Criar modulo: $code"; cat /tmp/new-module.json; exit 1; }
+          MODULE_ID=$(jq -r '.id' /tmp/new-module.json)
+
+          code=$(curl -sS -o /tmp/invalid-lesson.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{"title":"Vídeo inválido","kind":"VIDEO","contentUrl":"http://example.com/video.mp4","durationSeconds":60,"required":true}' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/modules/$MODULE_ID/lessons")
+          [[ "$code" == "400" ]] || { echo "Material inseguro: $code (esperado 400)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/new-lesson.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{"title":"Introdução prática","kind":"TEXT","bodyText":"Conteúdo de teste escrito pelo instrutor.","durationSeconds":120,"required":true}' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/modules/$MODULE_ID/lessons")
+          [[ "$code" == "201" ]] || { echo "Criar aula: $code"; cat /tmp/new-lesson.json; tail -420 /tmp/cursohub-integration.log; exit 1; }
+
+          code=$(curl -sS -o /tmp/published-course.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/publish")
+          [[ "$code" == "200" ]] || { echo "Publicar curso: $code"; cat /tmp/published-course.json; exit 1; }
+          jq -e '.status == "PUBLICADO"' /tmp/published-course.json >/dev/null
+
+          code=$(curl -sS -o /tmp/readonly-module.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -H 'Content-Type: application/json' -d '{"title":"Modulo posterior"}' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/modules")
+          [[ "$code" == "409" ]] || { echo "Editar publicado: $code (esperado 409)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/course-public.json -w '%{http_code}' \
+            "http://localhost:8080/api/v1/courses/curso-publicado-instrutor-ci")
+          [[ "$code" == "200" ]] || { echo "Curso publicado no catálogo: $code"; exit 1; }
+
+          # Segundo instrutor ativo com senha de teste copiada APENAS no banco temporário do CI.
+          docker exec -i "$POSTGRES_CONTAINER" psql -X -U cursohub -d cursohub_ci -v ON_ERROR_STOP=1 <<SQL
+          UPDATE app_users SET is_active = TRUE,
+            password_hash = (SELECT password_hash FROM app_users WHERE email = 'segunda.aluna@example.com')
+            WHERE email = 'instrutor-ci@example.com' AND role = 'INSTRUCTOR';
+          SQL
+
+          code=$(curl -sS -o /tmp/other-instructor-login.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"instrutor-ci@example.com","password":"SenhaForteCI#2026"}' \
+            http://localhost:8080/api/v1/auth/login)
+          [[ "$code" == "200" ]] || { echo "Segundo instrutor: $code"; exit 1; }
+          OTHER_INSTRUCTOR_TOKEN=$(jq -r '.accessToken' /tmp/other-instructor-login.json)
+
+          code=$(curl -sS -o /tmp/other-instructor-course.json -w '%{http_code}' \
+            -H "Authorization: Bearer $OTHER_INSTRUCTOR_TOKEN" \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/content")
+          [[ "$code" == "404" ]] || { echo "Isolamento entre instrutores: $code (esperado 404)"; exit 1; }
+
+          echo 'Smoke test OK: instrutor, rascunho, modulos, aulas, publicacao e isolamento.'
+
+
 
 

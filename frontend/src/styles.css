@@ -480,3 +480,173 @@
   .learning-header,.learning-content{padding:22px}
   .learning-sidebar{padding:18px}
 }
+
+
+/* Estúdio do instrutor — segue paletas Claro, Moderado e Black */
+.instructor-main{min-height:calc(100vh - 165px);padding:54px 0 90px;background:var(--course-bg);color:var(--course-text)}
+.instructor-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:32px}
+.instructor-top h1{font:800 clamp(30px,4vw,42px) 'Plus Jakarta Sans',sans-serif;letter-spacing:-1.2px;margin:13px 0 8px}
+.instructor-top p{color:var(--course-muted);font-size:14px}
+.instructor-grid{display:grid;grid-template-columns:minmax(270px,.72fr) minmax(0,1.3fr);gap:22px;align-items:start}
+.instructor-panel{background:var(--course-card);color:var(--course-text);border:1px solid var(--course-border);box-shadow:var(--course-shadow);border-radius:16px;padding:25px;min-width:0}
+.instructor-panel>h2,.instructor-panel h3{font:800 20px 'Plus Jakarta Sans',sans-serif;margin:0 0 20px;color:var(--course-text)}
+.instructor-panel h3{font-size:16px}
+.instructor-panel>p,.instructor-empty p,.instructor-course-heading p,.instructor-content-outline p{font-size:13px;color:var(--course-muted);line-height:1.6}
+.instructor-course-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.instructor-course-item{display:flex;justify-content:space-between;gap:14px;align-items:center;text-align:left;background:var(--course-input);color:var(--course-text);border:1px solid var(--course-border);padding:13px;border-radius:10px;font-size:12px}
+.instructor-course-item>span{color:var(--course-accent);font-size:11px;white-space:nowrap}
+.instructor-course-item.is-current{outline:2px solid var(--course-accent)}
+.instructor-rule{border-top:1px solid var(--course-border);margin:22px 0}
+.instructor-form{display:flex;flex-direction:column;gap:15px}
+.instructor-form label,.instructor-inline-form label{display:flex;flex-direction:column;gap:8px;font-size:12px;font-weight:700;min-width:0}
+.instructor-form input,.instructor-form select,.instructor-form textarea,
+.instructor-inline-form input{padding:12px 13px;border:1px solid var(--course-border);border-radius:9px;color:var(--course-text);background:var(--course-input);width:100%;outline:none}
+.instructor-form input:focus,.instructor-form select:focus,.instructor-form textarea:focus,
+.instructor-inline-form input:focus{border-color:var(--course-accent);box-shadow:0 0 0 2px #70b49a40}
+.instructor-form textarea{resize:vertical}
+.instructor-input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.instructor-form .instructor-checkbox{flex-direction:row;align-items:center;gap:9px;font-weight:500}
+.instructor-checkbox input{width:16px;height:16px;accent-color:var(--course-accent)}
+.instructor-message{border-radius:12px;border:1px solid var(--course-border);padding:14px 17px;margin-bottom:18px;font-size:13px}
+.instructor-error{color:#b53043;background:#fff0f1}
+.instructor-success{color:#177353;background:#e9f7ee}
+.instructor-editor{padding:30px}
+.instructor-empty{min-height:270px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.instructor-course-heading{display:flex;justify-content:space-between;gap:20px;align-items:start;flex-wrap:wrap;margin-bottom:25px}
+.instructor-kicker{font-size:10px;letter-spacing:1.5px;color:var(--course-accent);font-weight:800}
+.instructor-course-heading h2{font:800 23px 'Plus Jakarta Sans',sans-serif;margin:10px 0}
+.instructor-inline-form{display:flex;align-items:end;gap:10px;background:var(--course-soft);padding:17px;border-radius:12px;margin:10px 0 30px}
+.instructor-inline-form label{flex:1}
+.instructor-lesson-form{border:1px solid var(--course-border);padding:22px;border-radius:13px;margin:0 0 28px}
+.instructor-content-outline{border-top:1px solid var(--course-border);padding-top:25px;margin-top:20px}
+.instructor-outline-module{border:1px solid var(--course-border);border-radius:10px;padding:15px;margin:12px 0;color:var(--course-text);font-size:13px}
+.instructor-outline-lesson{display:flex;align-items:center;gap:10px;border-top:1px solid var(--course-border);padding:12px 0;font-size:12px}
+.instructor-outline-lesson:first-of-type{margin-top:10px}
+.instructor-outline-lesson>span:first-child{color:var(--course-accent)}
+.instructor-outline-lesson>small{margin-left:auto;color:var(--course-muted)}
+@media(max-width:940px){.instructor-grid{grid-template-columns:1fr}}
+@media(max-width:550px){.instructor-main{padding:35px 0 65px}.instructor-panel,.instructor-editor{padding:18px}.instructor-input-row{grid-template-columns:1fr}.instructor-inline-form{flex-direction:column;align-items:stretch}}
+
+
+/* Etapa 6 UX — Markdown didático, tipografia e blocos de código */
+.learning-reading:has(.learning-markdown) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+}
+
+.learning-markdown {
+  color: var(--course-text);
+  font-size: 15px;
+  line-height: 1.85;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.learning-markdown > :first-child { margin-top: 0; }
+.learning-markdown > :last-child { margin-bottom: 0; }
+.learning-markdown h1,
+.learning-markdown h2,
+.learning-markdown h3,
+.learning-markdown h4 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  color: var(--course-text);
+  letter-spacing: -.45px;
+  line-height: 1.35;
+  margin: 1.5em 0 .6em;
+}
+.learning-markdown h1 { font-size: clamp(22px, 2.6vw, 28px); }
+.learning-markdown h2 { font-size: 21px; }
+.learning-markdown h3 { font-size: 17px; }
+.learning-markdown h4 { font-size: 15px; }
+.learning-markdown p { margin: .75em 0 1.15em; }
+.learning-markdown strong { font-weight: 800; color: var(--course-text); }
+.learning-markdown em { font-style: italic; }
+.learning-markdown ul,
+.learning-markdown ol { margin: .7em 0 1.3em; padding-left: 1.8em; }
+.learning-markdown li { padding-left: 3px; margin: .25em 0; }
+.learning-markdown li::marker { color: var(--course-accent); }
+.learning-markdown li p { margin: .25em 0; }
+.learning-markdown a {
+  color: var(--course-accent);
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.learning-markdown a:focus-visible { outline: 2px solid var(--course-accent); outline-offset: 3px; }
+.learning-markdown blockquote {
+  margin: 1.2em 0;
+  padding: 12px 20px;
+  background: var(--course-card);
+  border-left: 4px solid var(--course-accent);
+  border-radius: 0 9px 9px 0;
+  color: var(--course-text);
+}
+.learning-markdown blockquote p { margin: 0; }
+.learning-markdown hr { border: 0; border-top: 1px solid var(--course-border); margin: 25px 0; }
+.learning-markdown pre {
+  background: #121b29;
+  color: #e7edf5;
+  border-radius: 12px;
+  padding: 20px;
+  overflow-x: auto;
+  margin: 1.2em 0;
+  border: 1px solid #344358;
+  white-space: pre;
+  tab-size: 4;
+  text-align: left;
+}
+.learning-markdown pre code {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0;
+  font: 13px/1.7 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.learning-markdown :not(pre) > code {
+  background: var(--course-card);
+  border: 1px solid var(--course-border);
+  color: var(--course-accent);
+  padding: 2px 5px;
+  border-radius: 5px;
+  font: .9em/1.55 Consolas, monospace;
+}
+.learning-markdown .hljs-keyword,
+.learning-markdown .hljs-selector-tag,
+.learning-markdown .hljs-built_in,
+.learning-markdown .hljs-type { color: #8dd9ff; }
+.learning-markdown .hljs-string,
+.learning-markdown .hljs-regexp,
+.learning-markdown .hljs-addition { color: #a7e69f; }
+.learning-markdown .hljs-number,
+.learning-markdown .hljs-literal,
+.learning-markdown .hljs-symbol { color: #ffcd9e; }
+.learning-markdown .hljs-comment,
+.learning-markdown .hljs-quote { color: #91a1b4; font-style: italic; }
+.learning-markdown .hljs-title,
+.learning-markdown .hljs-title.class_,
+.learning-markdown .hljs-title.function_ { color: #ffdd89; }
+.learning-markdown .hljs-meta,
+.learning-markdown .hljs-attr,
+.learning-markdown .hljs-attribute { color: #d5b6ff; }
+.learning-markdown table {
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  margin: 1.2em 0;
+  font-size: 13px;
+}
+.learning-markdown th,
+.learning-markdown td { border: 1px solid var(--course-border); padding: 10px 12px; text-align: left; }
+.learning-markdown th { background: var(--course-card); color: var(--course-text); font-weight: 800; }
+.learning-markdown input[type="checkbox"] { accent-color: var(--course-accent); }
+@media (max-width: 600px) {
+  .learning-reading { padding: 16px; }
+  .learning-markdown pre { padding: 13px; }
+  .learning-markdown pre code { font-size: 12px; }
+}
+
+/* Dica de formatação para instrutores de aulas em Markdown */
+.instructor-markdown-hint{display:block;color:var(--course-muted);font-size:11px;font-weight:400;line-height:1.6;margin-top:4px}

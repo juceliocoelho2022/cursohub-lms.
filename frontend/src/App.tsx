@@ -6,6 +6,7 @@ import { loadCourseTheme, saveCourseTheme } from './services/courseTheme'
 import type { CourseTheme } from './services/courseTheme'
 import { AuthDialog } from './components/AuthDialog'
 import { StudentDashboard } from './components/StudentDashboard'
+import { InstructorStudio } from './components/InstructorStudio'
 import { LearningRoom } from './components/LearningRoom'
 import type { AuthMode } from './components/AuthDialog'
 import { currentUser } from './services/auth'
@@ -33,7 +34,7 @@ export default function App() {
   const [authMode, setAuthMode] = useState<AuthMode | null>(null)
   const [session, setSession] = useState<AuthSession | null>(null)
   const [currentProfile, setCurrentProfile] = useState<CurrentUser | null>(null)
-  const [view, setView] = useState<'catalog' | 'dashboard' | 'learning'>('catalog')
+  const [view, setView] = useState<'catalog' | 'dashboard' | 'learning' | 'instructor'>('catalog')
   const [activeLearningSlug, setActiveLearningSlug] = useState<string | null>(null)
   const [scrollTarget, setScrollTarget] = useState<'courses' | 'about' | null>(null)
 
@@ -82,6 +83,7 @@ export default function App() {
     setSession(authenticated)
     setAuthMode(null)
     if (authenticated.role === 'STUDENT') setView('dashboard')
+    if (authenticated.role === 'INSTRUCTOR') setView('instructor')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
   const logout = useCallback(() => { setSession(null); setCurrentProfile(null); setView('catalog') }, [])
@@ -118,6 +120,12 @@ export default function App() {
                     Meu painel
                   </button>
                 )}
+                {session.role === 'INSTRUCTOR' && (
+                  <button className="nav-cta" type="button"
+                          onClick={() => { setView('instructor'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+                    Estúdio do Instrutor
+                  </button>
+                )}
                 <button className="nav-cta" type="button" onClick={logout}>Sair</button>
               </>
             ) : (
@@ -130,7 +138,14 @@ export default function App() {
         </div>
       </header>
 
-      {view === 'learning' && session?.role === 'STUDENT' && activeLearningSlug
+      {view === 'instructor' && session?.role === 'INSTRUCTOR'
+        ? <InstructorStudio
+            token={session.accessToken}
+            name={currentProfile?.name || session.name}
+            theme={courseTheme}
+            onThemeChange={setCourseTheme}
+          />
+        : view === 'learning' && session?.role === 'STUDENT' && activeLearningSlug
         ? <LearningRoom
             slug={activeLearningSlug}
             token={session.accessToken}
