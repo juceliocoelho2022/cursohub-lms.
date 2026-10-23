@@ -31,6 +31,7 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
   const [content, setContent] = useState<InstructorCourseContent | null>(null)
   const [draft, setDraft] = useState<CourseDraftForm>(emptyDraft)
   const [draftCover,setDraftCover] = useState<File|null>(null)
+  const [coverRevision,setCoverRevision] = useState(0)
   const [moduleTitle, setModuleTitle] = useState('')
   const [moduleId, setModuleId] = useState('')
   const [lesson, setLesson] = useState<LessonForm>(emptyLesson)
@@ -81,6 +82,7 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
       if(draftCover){
         try{
           await uploadCourseCover(token,course.id,draftCover)
+          setCoverRevision(v=>v+1)
           setDraftCover(null)
           setNotice('Curso e imagem de capa salvos! Agora adicione módulos e aulas.')
         }catch(err){
@@ -221,7 +223,7 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                   {editable && <button type="button" className="primary-btn"
                         disabled={busy} onClick={publishCourse}>Publicar curso ↗</button>}
                 </div>
-                <CourseCoverEditor key={content.course.id} token={token} courseId={content.course.id}/>
+                <CourseCoverEditor key={`${content.course.id}-${coverRevision}`} token={token} courseId={content.course.id}/>
                 {editable && (
                   <>
                     <form className="instructor-inline-form" onSubmit={createModule}>
