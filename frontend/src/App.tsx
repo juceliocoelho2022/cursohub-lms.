@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CourseCard } from './components/CourseCard'
 import { CourseModal } from './components/CourseModal'
+import { MembershipPlans } from './components/MembershipPlans'
 import { CourseThemeSelector } from './components/CourseThemeSelector'
 import { loadCourseTheme, saveCourseTheme } from './services/courseTheme'
 import type { CourseTheme } from './services/courseTheme'
@@ -36,7 +37,7 @@ export default function App() {
   const [currentProfile, setCurrentProfile] = useState<CurrentUser | null>(null)
   const [view, setView] = useState<'catalog' | 'dashboard' | 'learning' | 'instructor'>('catalog')
   const [activeLearningSlug, setActiveLearningSlug] = useState<string | null>(null)
-  const [scrollTarget, setScrollTarget] = useState<'courses' | 'about' | null>(null)
+  const [scrollTarget, setScrollTarget] = useState<'courses' | 'about' | 'plans' | null>(null)
 
   useEffect(() => saveCourseTheme(courseTheme), [courseTheme])
 
@@ -66,13 +67,17 @@ export default function App() {
     setView('catalog')
     setScrollTarget('courses')
   }, [])
+  const scrollToPlans = useCallback(() => {
+    setView('catalog')
+    setScrollTarget('plans')
+  }, [])
   const scrollToAbout = useCallback(() => {
     setView('catalog')
     setScrollTarget('about')
   }, [])
   useEffect(() => {
     if (view !== 'catalog' || !scrollTarget) return
-    const destination = scrollTarget === 'courses' ? coursesSection.current : document.getElementById('sobre')
+    const destination = scrollTarget === 'courses' ? coursesSection.current : document.getElementById(scrollTarget === 'plans'?'planos':'sobre')
     destination?.scrollIntoView({ behavior: 'smooth' })
     setScrollTarget(null)
   }, [view, scrollTarget])
@@ -109,6 +114,7 @@ export default function App() {
           </a>
           <nav aria-label="Navegação principal">
             <a href="#cursos" onClick={event => { event.preventDefault(); scrollToCourses() }}>Explorar cursos</a>
+            <a href="#planos" onClick={event => { event.preventDefault(); scrollToPlans() }}>Planos e benefícios</a>
             <a href="#sobre" onClick={event => { event.preventDefault(); scrollToAbout() }}>Sobre a plataforma</a>
           </nav>
           <div className="nav-account">
@@ -259,6 +265,8 @@ export default function App() {
             )}
           </div>
         </section>
+
+        <MembershipPlans onExplore={scrollToCourses} token={session?.role==='STUDENT'?session.accessToken:undefined}/>
 
         <section className="about-section" id="sobre">
           <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>O CursoHub conecta catálogo, autenticação e matrículas ao banco de dados. Aulas, avaliações e certificados serão disponibilizados nas próximas etapas.</p></div>

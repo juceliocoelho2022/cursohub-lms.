@@ -1,5 +1,5 @@
 import type { Course } from '../services/catalog'
-import { formatDuration, levels } from '../services/catalog'
+import { formatDuration, levels, money } from '../services/catalog'
 import { publicCoverUrl } from '../services/courseCover'
 
 interface CourseCardProps {
@@ -36,6 +36,10 @@ export function CourseCard({ course, onView }: CourseCardProps) {
           <span>{levels[course.level]}</span>
         </div>
         <h3>{course.title}</h3>
+        <div className={`course-price ${course.priceCents === 0 ? 'course-price-free' : ''}`}>
+          {course.priceCents===0?'Grátis':money(course.priceCents)}
+          {course.priceCents>0 && <small>Venda em preparação</small>}
+        </div>
         <p>{course.description}</p>
         <div className="course-footer">
           <span className="course-duration">◷ &nbsp;{formatDuration(course.estimatedMinutes)}</span>

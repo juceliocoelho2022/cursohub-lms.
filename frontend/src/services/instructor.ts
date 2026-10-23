@@ -12,6 +12,7 @@ export interface InstructorCourse {
   level: CourseLevel
   status: InstructorStatus
   estimatedMinutes: number
+  priceCents: number
 }
 
 export interface InstructorLesson {
@@ -45,6 +46,7 @@ export interface CourseDraftForm {
   category: string
   level: CourseLevel
   estimatedMinutes: number
+  priceCents: number
 }
 
 export interface LessonForm {

@@ -3,7 +3,7 @@ import { CourseThemeSelector } from './CourseThemeSelector'
 import type { CourseTheme } from '../services/courseTheme'
 import type { AuthSession } from '../services/auth'
 import type { Course } from '../services/catalog'
-import { formatDuration, levels, loadCourse } from '../services/catalog'
+import { formatDuration, levels, loadCourse, money } from '../services/catalog'
 import {publicCoverUrl} from '../services/courseCover'
 import { enrollInCourse } from '../services/enrollment'
 
@@ -69,6 +69,10 @@ export function CourseModal({ course, session, theme, onThemeChange, onClose, on
         <div className="modal-label">CONHEÇA O CURSO</div>
         <h2 id="course-modal-title">{details.title}</h2>
         <p className="modal-description">{details.description}</p>
+        <div className="modal-course-price" aria-label="Preço do curso">
+          {details.priceCents===0 ? 'Curso gratuito' : money(details.priceCents)}
+          {details.priceCents>0 && <small> Matrículas pagas disponíveis após ativação do checkout</small>}
+        </div>
         <div className="modal-facts">
           <span>◈ {details.category}</span>
           <span>◷ {formatDuration(details.estimatedMinutes)}</span>
@@ -83,7 +87,9 @@ export function CourseModal({ course, session, theme, onThemeChange, onClose, on
         </div>
         {error && <p className="inline-error" role="alert">{error}</p>}
 
-        {!session ? (
+        {details.priceCents>0 ? (
+          <p className="modal-paid-notice">Este curso é pago. Estamos preparando a contratação segura; ainda não é possível comprá-lo nem realizar matrícula.</p>
+        ) : !session ? (
           <button type="button" className="primary-btn full" onClick={onRequestLogin}>Entre para se matricular ↗</button>
         ) : session.role === 'STUDENT' ? (
           <button type="button" className="primary-btn full" onClick={handleEnrollment} disabled={busy}>

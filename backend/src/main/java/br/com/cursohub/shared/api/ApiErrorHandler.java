@@ -20,6 +20,11 @@ public class ApiErrorHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body(ex.getMessage()));
     }
 
+    @ExceptionHandler(br.com.cursohub.enrollment.application.exception.PaidCourseRequiresCheckoutException.class)
+    ResponseEntity<Map<String,Object>> handlePaidCourse(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body(ex.getMessage()));
+    }
+
     @ExceptionHandler(EnrollmentConflictException.class)
     ResponseEntity<Map<String, Object>> handleEnrollmentConflict(EnrollmentConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body(ex.getMessage()));

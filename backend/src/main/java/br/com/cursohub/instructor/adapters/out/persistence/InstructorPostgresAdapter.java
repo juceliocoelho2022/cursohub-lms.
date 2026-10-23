@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class InstructorPostgresAdapter implements InstructorStudioPort {
     private static final String SELECT_COURSE = """
-        SELECT id, slug, title, description, category, level, status, estimated_minutes
+        SELECT id, slug, title, description, category, level, status, estimated_minutes, price_cents
           FROM courses WHERE id = ? AND instructor_id = ?
         """;
 
@@ -32,7 +32,7 @@ public class InstructorPostgresAdapter implements InstructorStudioPort {
     @Transactional(readOnly = true)
     public List<InstructorCourse> listOwned(UUID instructorId) {
         return jdbc.query("""
-            SELECT id, slug, title, description, category, level, status, estimated_minutes
+            SELECT id, slug, title, description, category, level, status, estimated_minutes, price_cents
               FROM courses
              WHERE instructor_id = ?
              ORDER BY created_at DESC, id DESC
@@ -82,10 +82,10 @@ public class InstructorPostgresAdapter implements InstructorStudioPort {
         try {
             jdbc.update("""
                 INSERT INTO courses (id, instructor_id, slug, title, description,
-                                     category, level, status, estimated_minutes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'RASCUNHO', ?)
+                                     category, level, status, estimated_minutes, price_cents)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'RASCUNHO', ?, ?)
                 """, id, instructorId, command.slug(), command.title(), command.description(),
-                command.category(), command.level().name(), command.estimatedMinutes());
+                command.category(), command.level().name(), command.estimatedMinutes(),command.priceCents());
         } catch (DuplicateKeyException ex) {
             throw new InstructorContentConflictException("O slug informado já está em uso");
         }
@@ -183,7 +183,7 @@ public class InstructorPostgresAdapter implements InstructorStudioPort {
                 rs.getObject("id", UUID.class), rs.getString("slug"),
                 rs.getString("title"), rs.getString("description"),
                 rs.getString("category"), CourseLevel.valueOf(rs.getString("level")),
-                CourseStatus.valueOf(rs.getString("status")), rs.getInt("estimated_minutes"));
+                CourseStatus.valueOf(rs.getString("status")), rs.getInt("estimated_minutes"),rs.getInt("price_cents"));
     }
 
     private record ModuleRow(UUID id, String title, int position) {}

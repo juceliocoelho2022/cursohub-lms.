@@ -35,7 +35,7 @@ public class InstructorStudioController {
     public InstructorCourse create(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateCourseRequest request) {
         return useCase.createCourse(userId(jwt), new CreateCourseCommand(
                 request.slug(), request.title(), request.description(), request.category(),
-                request.level(), request.estimatedMinutes()));
+                request.level(), request.estimatedMinutes(),request.priceCents()==null?0:request.priceCents()));
     }
 
     @PostMapping("/{courseId}/modules")
@@ -62,7 +62,7 @@ public class InstructorStudioController {
     private static UUID userId(Jwt jwt) { return UUID.fromString(jwt.getSubject()); }
 
     public record CreateCourseRequest(String slug, String title, String description, String category,
-                                      CourseLevel level, int estimatedMinutes) {}
+                                      CourseLevel level, int estimatedMinutes, Integer priceCents) {}
     public record CreateModuleRequest(String title) {}
     public record CreateLessonRequest(String title, LessonKind kind, String contentUrl,
                                       String bodyText, int durationSeconds, boolean required) {}
