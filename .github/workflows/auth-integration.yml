@@ -385,6 +385,21 @@ jobs:
             -X POST -H "Authorization: Bearer $TOKEN" \
             "http://localhost:8080/api/v1/courses/curso-publicado-instrutor-ci/enrollments")
           [[ "$code" == "201" ]] || { echo "Aluno matricula curso novo: $code"; exit 1; }
+          # Regressão: listar materiais, inclusive cursos SEM anexos (bug SQL 500).
+          ASSETS_CI="http://localhost:8080/api/v1/students/me/courses/curso-publicado-instrutor-ci/assets"
+          code=$(curl -sS -o /tmp/ci-assets-list.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" "$ASSETS_CI")
+          [[ "$code" == "200" ]] || { echo "Listagem de materiais: $code (esperado 200)"; cat /tmp/ci-assets-list.json; exit 1; }
+          jq -e --arg pdf "$PDF_ASSET_ID" --arg video "$VIDEO_ID"             'any(.[]; .id == $pdf and .mediaType == "application/pdf") and any(.[]; .lessonId == $video and .mediaType == "video/mp4")'             /tmp/ci-assets-list.json >/dev/null
+
+          code=$(curl -sS -o /tmp/ci-assets-empty.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" \
+            "http://localhost:8080/api/v1/students/me/courses/curso-teste-dashboard/assets")
+          [[ "$code" == "200" ]] || { echo "Curso sem anexos: $code (esperado 200)"; exit 1; }
+          jq -e 'type == "array" and length == 0' /tmp/ci-assets-empty.json >/dev/null
+          code=$(curl -sS -o /tmp/ci-assets-forbidden.json -w '%{http_code}' "$ASSETS_CI")
+          [[ "$code" == "401" ]] || { echo "Listar sem JWT: $code (esperado 401)"; exit 1; }
+
           LESSONS_CI="http://localhost:8080/api/v1/students/me/courses/curso-publicado-instrutor-ci/lessons"
           code=$(curl -sS -o /tmp/ci-locked.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$LESSONS_CI")
           [[ "$code" == "200" ]] || { echo "Lições novo curso: $code"; exit 1; }
