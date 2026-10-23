@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CourseCard } from './components/CourseCard'
 import { CourseModal } from './components/CourseModal'
 import { MembershipPlans } from './components/MembershipPlans'
+import { TechEditorial } from './components/TechEditorial'
 import { CourseThemeSelector } from './components/CourseThemeSelector'
 import { loadCourseTheme, saveCourseTheme } from './services/courseTheme'
 import type { CourseTheme } from './services/courseTheme'
@@ -107,6 +108,12 @@ export default function App() {
 
   return (
     <div className="app-shell" data-course-theme={courseTheme}>
+      {view === 'catalog' && <div className="ch-utility-topbar">
+        <div className="container ch-utility-inner">
+          <span>✳ CURSOHUB <b>//</b> TECH EDUCATION</span>
+          <button type="button" onClick={scrollToPlans}>CONHEÇA O CLUBE CURSOHUB <span aria-hidden="true">↗</span></button>
+        </div>
+      </div>}
       <header className="site-header">
         <div className="container nav-row">
           <a className="brand" href="#inicio" aria-label="CursoHub — início" onClick={() => setView("catalog")}>
@@ -174,68 +181,15 @@ export default function App() {
             onThemeChange={setCourseTheme}
           />
         : <main id="inicio">
-        <section className="hero premium-hero">
-          <div className="container hero-grid">
-            <div className="hero-copy">
-              <div className="premium-hero-pill"><span className="eyebrow-dot" /> SUA EVOLUÇÃO COMEÇA AGORA <span aria-hidden="true">↗</span></div>
-              <h1>O próximo nível da sua carreira <em>começa aqui.</em></h1>
-              <p>Do primeiro código às tecnologias do mercado. Aprenda programação, dados e matemática com aulas organizadas, prática e progresso em cada etapa.</p>
-              <div className="hero-actions">
-                <button className="primary-btn premium-primary" type="button" onClick={scrollToCourses}>Explorar cursos <span aria-hidden="true">↗</span></button>
-                <button className="premium-secondary" type="button" onClick={scrollToPlans}>Conhecer planos <span aria-hidden="true">→</span></button>
-              </div>
-              <div className="premium-hero-proof">
-                <div><span aria-hidden="true">✓</span> Cursos gratuitos e premium</div>
-                <div><span aria-hidden="true">✓</span> Aprenda no seu ritmo</div>
-                <div><span aria-hidden="true">✓</span> Evolução acompanhada</div>
-              </div>
-            </div>
-            <div className="hero-art premium-art" aria-hidden="true">
-              <div className="premium-art-aura"/>
-              <div className="premium-code-window">
-                <div className="premium-window-top">
-                  <div className="premium-dots"><i/><i/><i/></div>
-                  <span>cursohub / learning-path</span><span>●</span>
-                </div>
-                <div className="premium-window-body">
-                  <div className="premium-code-label">SEU PRÓXIMO PROJETO</div>
-                  <div className="premium-typed-title"><span>&lt;/&gt;</span> Criar. Aprender. Evoluir.</div>
-                  <div className="premium-code-lines">
-                    <p><span className="code-purple">const</span> futuro = <span className="code-blue">'em construção'</span>;</p>
-                    <p><span className="code-purple">while</span> (curiosidade) {'{'}</p>
-                    <p className="indent"><span className="code-mint">praticar</span>();</p>
-                    <p className="indent"><span className="code-mint">evoluir</span>();</p>
-                    <p>{'}'}</p>
-                  </div>
-                  <div className="premium-art-footer"><span>● EM APRENDIZAGEM</span><span>CURSOHUB LMS</span></div>
-                </div>
-              </div>
-              <div className="premium-art-float premium-float-top">✦ <strong>Java &amp; Spring Boot</strong></div>
-              <div className="premium-art-float premium-float-bottom"><strong>↗ Seu próximo passo</strong><small>Um curso de cada vez</small></div>
-              <div className="premium-art-orbit">✳</div>
-            </div>
-          </div>
-        </section>
-        <section className="premium-skill-strip" aria-label="Explore por área">
-          <div className="container premium-skill-grid">
-            <button type="button" onClick={()=>{setCategory('Programação');scrollToCourses()}}>
-              <span className="premium-skill-icon">⌘</span><span><b>Desenvolvimento</b><small>Java, React e APIs</small></span><i aria-hidden="true">↗</i>
-            </button>
-            <button type="button" onClick={()=>{setCategory('Dados');scrollToCourses()}}>
-              <span className="premium-skill-icon">▤</span><span><b>Dados e Big Data</b><small>SQL e análise de dados</small></span><i aria-hidden="true">↗</i>
-            </button>
-            <button type="button" onClick={()=>{setCategory('Matemática');scrollToCourses()}}>
-              <span className="premium-skill-icon">∑</span><span><b>Matemática e lógica</b><small>Raciocínio e algoritmos</small></span><i aria-hidden="true">↗</i>
-            </button>
-          </div>
-        </section>
+        <TechEditorial onExplore={scrollToCourses} onPlans={scrollToPlans}
+          onCategory={value=>{setCategory(value);setLevel('');setSearch('');scrollToCourses()}}/>
 
         <section className="catalog-section" id="cursos" ref={coursesSection}>
           <div className="container">
-            <div className="section-topline"><span className="mini-rule" /> CATÁLOGO DE CURSOS</div>
+            <div className="section-topline"><span className="mini-rule" /> 03 / NOSSOS CURSOS</div>
             <div className="section-header">
-              <div><h2>Seu próximo <em>grande passo</em> começa aqui.</h2>
-                <p>Encontre conteúdos alinhados com seus objetivos e interesses.</p>
+              <div><h2>ESTUDE O QUE <em>MOVE O FUTURO.</em></h2>
+                <p>Explore nossos cursos, filtre por área e comece pelo conhecimento que você quer desenvolver.</p>
               </div>
               <span className="course-total">{catalog ? `${catalog.totalElements} curso${catalog.totalElements === 1 ? '' : 's'} disponível${catalog.totalElements === 1 ? '' : 'eis'}` : 'Carregando catálogo...'}</span>
             </div>

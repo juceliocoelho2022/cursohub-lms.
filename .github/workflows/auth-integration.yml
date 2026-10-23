@@ -2,7 +2,7 @@ name: CursoHub Auth Integration
 
 on:
   pull_request:
-    branches: [main, feature/course-cover-upload, feature/course-pricing-loyalty]
+    branches: [main, feature/course-cover-upload, feature/course-pricing-loyalty, feature/home-premium-redesign]
   workflow_dispatch:
 
 permissions:
