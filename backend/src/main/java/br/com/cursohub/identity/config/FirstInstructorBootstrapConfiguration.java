@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /** Opt-in and local-only bootstrap. No public instructor registration endpoint. */
@@ -25,7 +26,7 @@ public class FirstInstructorBootstrapConfiguration {
     @ConditionalOnProperty(name = "cursohub.bootstrap.instructor.enabled", havingValue = "true")
     CommandLineRunner firstInstructorBootstrap(
             UserStorePort users, PasswordHasherPort passwords, JdbcTemplate jdbc,
-            TransactionTemplate transactions,
+            PlatformTransactionManager transactionManager,
             @Value("${cursohub.bootstrap.instructor.name:}") String name,
             @Value("${cursohub.bootstrap.instructor.email:}") String configuredEmail,
             @Value("${cursohub.bootstrap.instructor.password:}") String password) {
@@ -37,7 +38,7 @@ public class FirstInstructorBootstrapConfiguration {
                     || password.length() < 12 || password.getBytes(StandardCharsets.UTF_8).length > 72) {
                 throw new IllegalStateException("Configuracao invalida do bootstrap de instrutor.");
             }
-            transactions.executeWithoutResult(status -> {
+            new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
                 // Lock the users table so concurrent bootstraps cannot create multiple instructors.
                 jdbc.execute("LOCK TABLE app_users IN SHARE ROW EXCLUSIVE MODE");
                 Integer existing = jdbc.queryForObject(
