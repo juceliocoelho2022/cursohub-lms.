@@ -1,0 +1,169 @@
+import { useEffect, useMemo, useState } from 'react'
+import type { CourseTheme } from '../services/courseTheme'
+import { CourseThemeSelector } from './CourseThemeSelector'
+import { completeLesson, getCourseLessons, isDirectVideoUrl, safeMaterialUrl } from '../services/learning'
+import type { LearningCourse, LearningLesson } from '../services/learning'
+
+interface Props {
+  slug: string
+  token: string
+  theme: CourseTheme
+  onThemeChange: (value: CourseTheme) => void
+  onBack: () => void
+}
+
+export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Props) {
+  const [course, setCourse] = useState<LearningCourse | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [actionError, setActionError] = useState('')
+  const [feedback, setFeedback] = useState('')
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setLoading(true)
+    setError('')
+    getCourseLessons(slug, token, controller.signal)
+      .then(data => {
+        setCourse(data)
+        setActiveId(id =>
+          id && data.modules.some(module => module.lessons.some(lesson => lesson.id === id))
+            ? id : data.modules.flatMap(module => module.lessons)[0]?.id ?? null
+        )
+      })
+      .catch(err => { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Erro inesperado') })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    return () => controller.abort()
+  }, [slug, token])
+
+  const activeLesson = useMemo<LearningLesson | null>(() =>
+    course?.modules.flatMap(module => module.lessons).find(lesson => lesson.id === activeId) ?? null,
+    [course, activeId],
+  )
+
+  async function markAsCompleted() {
+    if (!activeLesson || activeLesson.completed || saving) return
+    setSaving(true)
+    setActionError('')
+    setFeedback('')
+    try {
+      const result = await completeLesson(slug, activeLesson.id, token)
+      // Recarregamos o servidor: a UI mostra o progresso persistido, não um valor inventado.
+      const updated = await getCourseLessons(slug, token)
+      setCourse(updated)
+      setFeedback(result.newlyCompleted ? 'Aula concluída e registrada no seu progresso.' : 'Esta aula já estava concluída.')
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Não foi possível salvar sua conclusão.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const material = safeMaterialUrl(activeLesson?.contentUrl ?? null)
+
+  return (
+    <main className="learning-main">
+      <div className="container">
+        <div className="learning-top">
+          <button className="secondary-btn" type="button" onClick={onBack}>← Voltar ao meu painel</button>
+          <CourseThemeSelector value={theme} onChange={onThemeChange} compact />
+        </div>
+        {loading && <div className="dashboard-state" role="status"><div className="spinner" /><p>Carregando aulas do curso...</p></div>}
+        {error && !loading && <div className="dashboard-state" role="alert"><h2>Não foi possível abrir este curso</h2><p>{error}</p><button type="button" className="secondary-btn" onClick={onBack}>Voltar ao painel</button></div>}
+        {course && !loading && !error && (
+          <>
+            <div className="learning-header">
+              <span className="section-topline"><span className="mini-rule" /> AMBIENTE DE APRENDIZAGEM</span>
+              <h1>{course.title}</h1>
+              <div className="learning-header-progress">
+                <span>{course.completedRequiredLessons} de {course.requiredLessons} aulas obrigatórias concluídas</span>
+                <strong>{course.progressPercent}%</strong>
+              </div>
+              <div className="dashboard-progress-track" role="progressbar"
+                   aria-valuemin={0} aria-valuemax={100} aria-valuenow={course.progressPercent}
+                   aria-label="Progresso nas aulas obrigatórias">
+                <div style={{ width: `${course.progressPercent}%` }}/>
+              </div>
+            </div>
+            <div className="learning-layout">
+              <aside className="learning-sidebar" aria-label="Módulos e aulas do curso">
+                <h2>Conteúdo do curso</h2>
+                {course.modules.length === 0 && <p>Nenhum módulo cadastrado até o momento.</p>}
+                {course.modules.map(module => (
+                  <section className="learning-module" key={module.id}>
+                    <h3>{module.position}. {module.title}</h3>
+                    {module.lessons.length === 0 && <p className="learning-empty-module">Ainda sem aulas.</p>}
+                    {module.lessons.map(lesson => (
+                      <button type="button" key={lesson.id}
+                              aria-current={lesson.id === activeId ? 'true' : undefined}
+                              className={`learning-lesson-nav ${lesson.id === activeId ? 'is-active' : ''}`}
+                              onClick={() => { setActiveId(lesson.id); setActionError(''); setFeedback('') }}>
+                        <span aria-hidden="true">{lesson.completed ? '✓' : lesson.kind === 'VIDEO' ? '▶' : lesson.kind === 'PDF' ? '▤' : '◉'}</span>
+                        <span>{lesson.title}</span>
+                        {lesson.completed && <span className="sr-only">Concluída</span>}
+                      </button>
+                    ))}
+                  </section>
+                ))}
+              </aside>
+              <section className="learning-content" aria-label="Conteúdo da aula selecionada">
+                {!activeLesson ? (
+                  <div className="learning-no-lesson"><h2>Aulas em preparação</h2><p>O instrutor ainda não disponibilizou conteúdo neste curso.</p></div>
+                ) : (
+                  <>
+                    <div className="learning-lesson-eyebrow">
+                      {activeLesson.kind === 'TEXT' ? 'AULA DE LEITURA' : activeLesson.kind === 'VIDEO' ? 'VIDEOAULA' : 'MATERIAL PDF'}
+                      {' · '}
+                      {activeLesson.required ? 'OBRIGATÓRIA' : 'COMPLEMENTAR'}
+                    </div>
+                    <h2>{activeLesson.title}</h2>
+                    {activeLesson.kind === 'TEXT' && (
+                      <div className="learning-reading">
+                        {activeLesson.bodyText?.trim() || 'O conteúdo de texto desta aula ainda não foi disponibilizado.'}
+                      </div>
+                    )}
+                    {activeLesson.kind === 'VIDEO' && (
+                      <div className="learning-resource">
+                        {material ? (
+                          <>
+                            {isDirectVideoUrl(material) && (
+                              <video key={activeLesson.id} controls preload="metadata" playsInline className="learning-video" src={material}>
+                                Seu navegador não suporta reprodução de vídeo.
+                              </video>
+                            )}
+                            <a href={material} target="_blank" rel="noopener noreferrer" className="learning-resource-link">
+                              Abrir vídeo em nova aba ↗
+                            </a>
+                          </>
+                        ) : <p>O vídeo ainda não está disponível. Consulte o instrutor.</p>}
+                      </div>
+                    )}
+                    {activeLesson.kind === 'PDF' && (
+                      <div className="learning-resource">
+                        {material
+                          ? <a href={material} target="_blank" rel="noopener noreferrer" className="learning-resource-link">Abrir material PDF ↗</a>
+                          : <p>O material PDF ainda não está disponível. Consulte o instrutor.</p>}
+                      </div>
+                    )}
+                    <div className="learning-finish">
+                      {activeLesson.completed
+                        ? <span className="learning-complete-label">✓ Aula concluída</span>
+                        : <button type="button" className="primary-btn" onClick={markAsCompleted} disabled={saving}>
+                            {saving ? 'Salvando conclusão...' : 'Marcar aula como concluída ✓'}
+                          </button>}
+                      <p>O progresso é registrado quando você confirma a conclusão da aula.</p>
+                      {feedback && <p className="learning-feedback" role="status">{feedback}</p>}
+                      {actionError && <p className="inline-error" role="alert">{actionError}</p>}
+                    </div>
+                  </>
+                )}
+              </section>
+            </div>
+          </>
+        )}
+      </div>
+    </main>
+  )
+}
