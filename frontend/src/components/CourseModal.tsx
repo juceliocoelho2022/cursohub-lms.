@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CourseThemeSelector } from './CourseThemeSelector'
+import { SocialShare } from './SocialShare'
 import type { CourseTheme } from '../services/courseTheme'
 import type { AuthSession } from '../services/auth'
 import type { Course } from '../services/catalog'
@@ -85,6 +86,7 @@ export function CourseModal({ course, session, theme, onThemeChange, onClose, on
           <strong>Aprenda no seu ritmo</strong>
           <p>Inscreva-se no curso para adicioná-lo ao seu painel. As aulas e a marcação de progresso serão disponibilizadas em uma próxima etapa.</p>
         </div>
+        <SocialShare title={details.title} slug={details.slug} compact/>
         {error && <p className="inline-error" role="alert">{error}</p>}
 
         {details.priceCents>0 ? (

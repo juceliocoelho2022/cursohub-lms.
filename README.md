@@ -1,176 +1,229 @@
-# CursoHub LMS — Plataforma de Cursos Online
+# CursoHub LMS
 
-Plataforma **Learning Management System (LMS)** com **Clean Architecture + Arquitetura Hexagonal (Ports & Adapters)**, construída com **Java 21**, **Spring Boot 4.1.2**, **PostgreSQL 17**, **Flyway**, **React 19**, **TypeScript**, **Vite 7** e **Docker Compose**.
+**Aprenda. Pratique. Evolua.** Uma plataforma de ensino online para transformar conhecimento em experiências práticas de aprendizagem.
 
-> **Status: Etapa 1 — Fundação + Catálogo público.** O projeto contém código-fonte de backend, frontend, schema SQL, dados demonstrativos, testes e documentação. Login, matrículas e aulas privadas ainda não estão implementados.
+[![Java 21](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](backend/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1.2-6DB33F?style=flat-square&logo=springboot&logoColor=white)](backend/)
+[![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](frontend/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](frontend/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=flat-square&logo=postgresql&logoColor=white)](backend/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](compose.yaml)
 
-## Arquitetura e modelagem relacional
+**CursoHub** é um projeto de **Learning Management System (LMS)** com catálogo de cursos, experiências separadas para estudantes e instrutores, aulas, matrículas, acompanhamento de progresso e gestão de conteúdos. A aplicação usa um **monólito modular**, princípios de **Clean Architecture** e **Arquitetura Hexagonal (Ports & Adapters)**.
 
-O CursoHub foi estruturado como **monólito modular**, adotando **Clean Architecture** e **Arquitetura Hexagonal (Ports & Adapters)**. A camada de aplicação conhece apenas interfaces (portas); detalhes como HTTP, Spring Data JPA e PostgreSQL ficam nos adaptadores.
+> [!IMPORTANT]
+> **Projeto em desenvolvimento — não é um serviço comercial em produção.**
+> Este README descreve as funcionalidades integradas à branch `main` por meio dos PRs #8 a #12. A implementação de avaliações e certificados permanece separada no [PR #7](https://github.com/juceliocoelho2022/cursohub-lms./pull/7). Pagamentos, ativação de assinaturas e perfis oficiais de redes sociais ainda não estão disponíveis.
 
-### Visão técnica do sistema
+## Navegação
+
+- [Visão geral](#visão-geral)
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Arquitetura](#arquitetura)
+- [Executando o projeto](#executando-o-projeto)
+- [Principais APIs](#principais-apis)
+- [Planos e fidelidade](#planos-e-fidelidade)
+- [Redes sociais e compartilhamento](#redes-sociais-e-compartilhamento)
+- [Testes e qualidade](#testes-e-qualidade)
+- [Segurança e limitações](#segurança-e-limitações)
+- [Documentação e roadmap](#documentação-e-roadmap)
+
+## Visão geral
+
+O CursoHub reúne três frentes de uma plataforma educacional:
+
+| Experiência | Recursos |
+|---|---|
+| **Visitante** | Home editorial de tecnologia, navegação por áreas, catálogo público, busca, filtros, informações dos cursos e planos apresentados de forma transparente. |
+| **Estudante** | Cadastro, login, painel de matrículas, aulas de texto e vídeo, download de materiais, progresso, desbloqueio sequencial e pontos de fidelidade. |
+| **Instrutor** | Estúdio de criação de cursos, módulos e aulas, publicação de rascunhos, capa personalizada, upload de materiais e videoaulas. |
+
+O layout foi concebido para uma experiência responsiva, com seleção de aparência **Claro, Moderado e Black**. A linguagem editorial da home usa elementos visuais próprios do CursoHub, voltados à educação tecnológica.
+
+## Funcionalidades
+
+### Catálogo e identidade
+
+- [x] Catálogo público de cursos publicados, com paginação, pesquisa, categoria e nível.
+- [x] Cadastro público exclusivo para **estudantes**.
+- [x] Login com JWT e segregação entre os perfis `STUDENT` e `INSTRUCTOR`.
+- [x] Painel do estudante com cursos matriculados e informações de progresso.
+- [x] Catálogo com capa, duração, categoria, nível e preço em reais.
+- [x] Alternância entre os temas Claro, Moderado e Black.
+
+### Ensino e produção de conteúdo
+
+- [x] Estúdio do Instrutor: criar rascunho, adicionar módulo e aula e publicar curso.
+- [x] Conteúdo de leitura, videoaulas MP4/WEBM e materiais PDF, imagem e ZIP.
+- [x] Upload de capa JPG/PNG/WEBP para cursos novos e existentes.
+- [x] Matrículas em cursos gratuitos, com controle de duplicidade.
+- [x] Progresso das aulas obrigatórias e **desbloqueio sequencial**.
+- [x] Conclusão da videoaula somente após reprodução registrada como **100%** pelo backend.
+- [x] Arquivos de aulas disponíveis apenas aos usuários autorizados.
+
+**Observação pedagógica:** o progresso de vídeo considera eventos de reprodução sujeitos a validações no servidor; isso não comprova atenção ou aprendizagem efetiva do aluno.
+
+### Experiência comercial e comunidade
+
+- [x] Apresentação de preços no catálogo; cursos gratuitos identificados.
+- [x] Vitrine de planos Mensal, Semestral e Anual na home.
+- [x] **Fidelidade gratuita**: 100 pontos por curso concluído; níveis Bronze, Prata e Ouro.
+- [x] Área de redes sociais configurável e compartilhamento de links de cursos.
+- [ ] Checkout, confirmação de pagamento e ativação real das assinaturas.
+- [ ] Resgate de pontos ou aplicação financeira de descontos.
+- [ ] Configuração dos perfis oficiais de todas as redes sociais.
+
+> [!NOTE]
+> **Avaliações e certificados** possuem implementação experimental no [PR #7](https://github.com/juceliocoelho2022/cursohub-lms./pull/7), **separada desta branch**. Não são anunciados aqui como funcionalidades disponíveis na versão atual. A política de certificação deverá ser validada antes da integração.
+
+## Tecnologias
+
+| Camada | Stack |
+|---|---|
+| Backend | Java 21, Spring Boot 4.1.2, Spring Security, Spring Data JPA |
+| Arquitetura | Clean Architecture, Ports & Adapters, monólito modular |
+| Autenticação | JWT HS256, BCrypt |
+| Banco de dados | PostgreSQL 17, Flyway |
+| Frontend | React 19, TypeScript 5, Vite 7 |
+| Apresentação | CSS responsivo, Nginx |
+| Conteúdo | Upload multipart e armazenamento MVP em PostgreSQL (`BYTEA`) |
+| Infraestrutura local | Docker Compose |
+| Qualidade | JUnit, Maven, checagem arquitetural, GitHub Actions |
+
+## Arquitetura
+
+O backend é dividido por contexto funcional: `catalog`, `identity`, `enrollment`, `student`, `learning`, `instructor`, `assets`, `cover`, `loyalty` e `membership`.
 
 ```mermaid
 flowchart LR
-    Client["React + TypeScript"] --> HTTP["API REST / Spring Boot 4"]
-    HTTP --> Core["Casos de uso + domínio\nJava 21"]
-    Core --> Port["Portas de persistência"]
-    Adapter["Adaptadores JPA"] -. "implementam" .-> Port
-    Adapter --> DB[("PostgreSQL 17")]
+    User["Visitante / Estudante / Instrutor"] --> Web["React + TypeScript"]
+    Web --> Proxy["Nginx / API REST"]
+    Proxy --> Ctrl["Adaptadores HTTP"]
+    Ctrl --> UseCases["Casos de uso e domínio"]
+    UseCases --> Ports["Portas de saída"]
+    Persistence["Adaptadores JPA / JDBC"] -. implementam .-> Ports
+    Persistence --> Database[("PostgreSQL 17")]
+    Migration["Flyway V1–V6"] --> Database
 ```
 
-### Modelo relacional resumido
+Os serviços de aplicação dependem de **portas**, não diretamente de detalhes de banco ou HTTP. Controllers, repositórios e infraestrutura atuam como adaptadores. As migrações Flyway versionam a estrutura relacional sem depender de `hibernate.hbm2ddl.auto=create`.
 
-```mermaid
-erDiagram
-    app_users ||--o{ courses : "instrui"
-    app_users ||--o{ enrollments : "estuda"
-    courses ||--o{ course_modules : "possui"
-    course_modules ||--o{ lessons : "contem"
-    courses ||--o{ enrollments : "recebe"
-    enrollments ||--o{ lesson_progress : "registra"
-    lessons ||--o{ lesson_progress : "conclui"
-    enrollments ||--o| certificates : "origina"
-
-    app_users {
-      uuid id PK
-      varchar full_name
-      varchar email UK
-      varchar role
-    }
-    courses {
-      uuid id PK
-      uuid instructor_id FK
-      varchar slug UK
-      varchar title
-      varchar status
-    }
-    course_modules {
-      uuid id PK
-      uuid course_id FK
-      integer position
-    }
-    lessons {
-      uuid id PK
-      uuid module_id FK
-      varchar title
-      boolean is_required
-    }
-    enrollments {
-      uuid id PK
-      uuid student_id FK
-      uuid course_id FK
-      varchar status
-    }
-    lesson_progress {
-      uuid id PK
-      uuid enrollment_id FK
-      uuid lesson_id FK
-    }
-    certificates {
-      uuid id PK
-      uuid enrollment_id FK
-      uuid verification_code UK
-    }
-```
-
-O diagrama acima resume o domínio de aprendizagem. O **DER completo da V1 possui 12 tabelas**, incluindo avaliações, questões, alternativas, tentativas e respostas.
-
-**Documentação técnica:**
-- [DER completo, modelo lógico, dicionário e SQL](docs/MODELO_RELACIONAL.md)
-- [Arquitetura técnica, componentes, sequência e implantação](docs/ARQUITETURA_TECNICA.md)
-- [Clean Architecture e Hexagonal aplicadas ao projeto](docs/ARQUITETURA.md)
-- [Regras de negócio](docs/REGRAS_DE_NEGOCIO.md)
-- [DDL físico via Flyway](backend/src/main/resources/db/migration/V1__create_learning_platform.sql)
-
-> O banco contempla futuros módulos do LMS, mas a **Etapa 1 da aplicação** disponibiliza apenas o catálogo público. Cadastro/login estão sendo desenvolvidos em branch separada.
-
-## Estrutura
+### Estrutura resumida
 
 ```text
 cursohub-lms/
 ├── backend/
-│   ├── pom.xml
-│   ├── Dockerfile
-│   └── src/
-│       ├── main/java/br/com/cursohub/
-│       │   ├── CursoHubApplication.java
-│       │   ├── catalog/
-│       │   │   ├── domain/             # Regras Java puras
-│       │   │   ├── application/        # Casos de uso e portas
-│       │   │   ├── adapters/in/web/    # Controller REST
-│       │   │   ├── adapters/out/       # JPA / PostgreSQL
-│       │   │   └── config/            # Injeção de dependências
-│       │   └── shared/api/            # Tratamento de erros HTTP
-│       ├── main/resources/db/
-│       │   ├── migration/             # Flyway: schema
-│       │   └── demo/                  # Seed local, não produção
-│       └── test/                      # JUnit / fake repository
+│   ├── src/main/java/br/com/cursohub/
+│   │   ├── catalog/        # Consulta de cursos
+│   │   ├── identity/       # Contas, autenticação e perfis
+│   │   ├── instructor/     # Cursos, módulos e aulas
+│   │   ├── enrollment/     # Matrículas
+│   │   ├── student/        # Dashboard
+│   │   ├── learning/       # Leitura, progresso e vídeos
+│   │   ├── assets/         # Materiais do curso
+│   │   ├── cover/          # Capas dos cursos
+│   │   ├── loyalty/       # Pontos de aprendizagem
+│   │   ├── membership/    # Catálogo de planos
+│   │   └── shared/        # Recursos compartilhados
+│   ├── src/main/resources/db/
+│   │   ├── migration/      # Migrações Flyway
+│   │   └── demo/           # Cursos demonstrativos locais
+│   └── src/test/
 ├── frontend/
-│   ├── src/                           # React e TypeScript
-│   ├── nginx/default.conf
-│   └── Dockerfile
+│   ├── public/social-links.json
+│   ├── src/components/
+│   ├── src/services/
+│   └── nginx/default.conf
 ├── docs/
-│   ├── ARQUITETURA.md
-│   ├── ARQUITETURA_TECNICA.md
-│   ├── MODELO_RELACIONAL.md
-│   ├── GUIA_PRATICO_VIDEO.md
-│   ├── REGRAS_DE_NEGOCIO.md
-│   └── ROADMAP.md
 ├── scripts/check_architecture.py
-├── compose.yaml
-├── compose.local-db-port.yaml
+├── .github/workflows/
 ├── .env.example
-└── .gitignore
+└── compose.yaml
 ```
 
-## Fluxo Clean + Hexagonal
+## Executando o projeto
 
-`React → CatalogController → CatalogQueryUseCase → CatalogService → CourseReaderPort → CoursePostgresAdapter → JPA → PostgreSQL`
+### Pré-requisitos
 
-O domínio `Course` não utiliza `@Entity`. O mapeamento do banco fica isolado em `JpaCourseEntity`. Testes unitários exercitam o caso de uso sem conectar ao PostgreSQL.
+- **Docker Desktop** com Docker Compose;
+- **Git** e terminal **PowerShell** (nos exemplos abaixo);
+- Portas `3000` (frontend) e `8080` (API) disponíveis.
 
-## Como executar com Docker
+> [!CAUTION]
+> Se você já usa o CursoHub em `C:\Projetos\cursohub-lms-repo`, **preserve o arquivo `.env` e o volume do banco**. Não execute `docker compose down -v`: esse comando remove os dados do PostgreSQL. Use sempre `-p cursohub-lms` para manter o mesmo projeto Compose entre as branches.
 
-Pré-requisitos: **Docker Desktop** com Compose e portas **3000** e **8080** disponíveis. A porta PostgreSQL **5432 não é publicada no Windows**; a comunicação entre API e banco acontece internamente pela rede Docker. Na pasta clonada:
+### 1. Atualizar a versão principal
+
+A partir de seu clone local:
 
 ```powershell
-Copy-Item .env.example .env
-# Substitua a senha de demonstração por uma senha local segura no .env
-docker compose up --build -d
-docker compose ps
+cd C:\Projetos\cursohub-lms-repo
+git status
+git fetch origin
+git switch main
+git pull --ff-only origin main
 ```
 
-- **Frontend**: http://localhost:3000
-- **API de cursos**: http://localhost:8080/api/v1/courses
-- **Healthcheck**: http://localhost:8080/actuator/health
+Se o repositório ainda não estiver clonado, use o endereço disponível no topo desta página. Verifique o `git status` antes de trocar de branch: não descarte modificações locais sem analisá-las. O nome remoto do repositório contém um **ponto final** (`cursohub-lms.`), então utilize a URL indicada pelo GitHub para clonar.
 
-O Compose utiliza volume de dados PostgreSQL e ativa um **seed local** de quatro cursos fictícios. Não habilite `db/demo` em produção.
+### 2. Configurar o ambiente
+
+**Somente na primeira instalação**, crie um arquivo `.env` a partir do modelo:
 
 ```powershell
-docker compose logs -f backend
-docker compose down
+if (-not (Test-Path .env)) {
+    Copy-Item .env.example .env
+}
 ```
 
-**Cuidado:** `docker compose down -v` também apaga o volume de dados.
-
-## Desenvolvimento local
-
-Pré-requisitos: **Java 21**, **Maven**, **Node.js 22**, **npm** e PostgreSQL.
+Edite o arquivo `.env` e configure uma senha local forte em `POSTGRES_PASSWORD`. Gere uma chave JWT com **32 bytes aleatórios**:
 
 ```powershell
-Copy-Item .env.example .env
-# A publicação opcional usa 5433 no Windows, evitando o conflito na 5432
-docker compose -f compose.yaml -f compose.local-db-port.yaml up -d db
-$env:DB_URL = "jdbc:postgresql://localhost:5433/cursohub"
-$env:DB_USER = "cursohub"
-$env:DB_PASSWORD = "<defina-a-mesma-senha-do-arquivo-env>"
-$env:FLYWAY_LOCATIONS = "classpath:db/migration,classpath:db/demo"
-cd backend
-mvn spring-boot:run
+[Convert]::ToBase64String(
+    [Security.Cryptography.RandomNumberGenerator]::GetBytes(32)
+)
 ```
 
-Em outro terminal:
+Copie a saída gerada para o valor de `JWT_SECRET_BASE64` no `.env`.
+
+**Não compartilhe nem versione `.env`, senhas ou segredos.** Se o banco já tiver dados, mantenha a senha de acesso existente; alterar a variável isoladamente não redefine a senha interna do PostgreSQL.
+
+### 3. Iniciar os serviços
+
+```powershell
+docker compose -p cursohub-lms up -d --build
+docker compose -p cursohub-lms ps
+
+curl.exe -i http://localhost:8080/actuator/health
+curl.exe -i http://localhost:8080/api/v1/courses
+curl.exe -i http://localhost:8080/api/v1/membership/plans
+```
+
+| Serviço | Acesso local |
+|---|---|
+| Home e plataforma | [localhost:3000](http://localhost:3000) |
+| API REST | [localhost:8080](http://localhost:8080) |
+| Catálogo de cursos | [GET /api/v1/courses](http://localhost:8080/api/v1/courses) |
+| Planos informativos | [GET /api/v1/membership/plans](http://localhost:8080/api/v1/membership/plans) |
+| Healthcheck | [GET /actuator/health](http://localhost:8080/actuator/health) |
+| PostgreSQL | `db:5432` **somente na rede interna Docker** |
+
+O Nginx entrega o frontend na porta `3000` e encaminha as requisições `/api/` à API. As migrações Flyway são aplicadas ao inicializar o backend. A configuração Compose atual habilita dados demonstrativos; **não reutilize essa configuração de demonstração diretamente em produção**.
+
+### Diagnóstico rápido
+
+```powershell
+docker compose -p cursohub-lms logs --tail=120 backend
+
+docker compose -p cursohub-lms exec -T db psql -U cursohub -d cursohub -c "SELECT version,description,success FROM flyway_schema_history ORDER BY installed_rank;"
+```
+
+Na versão principal atual são esperadas as versões **V1, V2 (demo), V3, V4, V5 e V6**, todas com `success=t`.
+
+### Desenvolvimento sem reconstruir o frontend a cada alteração
+
+Pré-requisitos adicionais: Java 21, Maven e Node.js 22. Consulte a configuração de banco em [`compose.local-db-port.yaml`](compose.local-db-port.yaml). O Vite inicia na porta `5173` e encaminha `/api` à API local.
 
 ```powershell
 cd frontend
@@ -178,44 +231,116 @@ npm install
 npm run dev
 ```
 
-O Vite abre em `http://localhost:5173` e encaminha `/api` para o Spring Boot.
+## Principais APIs
 
-## Endpoints
-
-| Método | Endpoint | Finalidade |
+| Método | Rota | Acesso |
 |---|---|---|
-| GET | `/api/v1/courses` | Busca paginada de cursos publicados |
-| GET | `/api/v1/courses/{slug}` | Detalhes de curso publicado |
-| GET | `/actuator/health` | Estado da API |
+| `GET` | `/api/v1/courses` | Público — catálogo, busca e filtros |
+| `GET` | `/api/v1/courses/{slug}` | Público — detalhes do curso |
+| `POST` | `/api/v1/auth/register` | Público — cadastro de estudante |
+| `POST` | `/api/v1/auth/login` | Público — autenticação |
+| `GET` | `/api/v1/auth/me` | JWT |
+| `GET` | `/api/v1/students/me/dashboard` | Estudante |
+| `POST` | `/api/v1/courses/{slug}/enrollments` | Estudante — curso gratuito |
+| `GET` | `/api/v1/students/me/courses/{slug}/lessons` | Estudante matriculado |
+| `POST` | `/api/v1/students/me/courses/{slug}/lessons/{lessonId}/video-progress` | Estudante matriculado |
+| `GET` | `/api/v1/instructor/courses` | Instrutor |
+| `POST` | `/api/v1/instructor/courses` | Instrutor — rascunho |
+| `POST` | `/api/v1/instructor/courses/{courseId}/cover` | Instrutor dono — imagem |
+| `POST` | `/api/v1/instructor/courses/{courseId}/assets` | Instrutor dono — materiais/vídeos |
+| `GET` | `/api/v1/students/me/loyalty` | Estudante — pontos e nível |
+| `GET` | `/api/v1/membership/plans` | Público — planos informativos |
 
-Filtros: `q`, `categoria`, `nivel` (`INICIANTE`, `INTERMEDIARIO`, `AVANCADO`), `page` e `size` (1–48).
+Para o catálogo, os filtros incluem `q`, `categoria`, `nivel`, `page` e `size`. Endpoints de escrita exigem autenticação e autorização conforme o recurso.
+
+## Planos e fidelidade
+
+O **Clube CursoHub** apresenta condições comerciais propostas para contratação futura:
+
+| Plano | Período | Valor total | Equivalente mensal | Acesso proposto |
+|---|---:|---:|---:|---|
+| Mensal | 1 mês | **R$ 59,90** | R$ 59,90 | Até 3 cursos elegíveis |
+| Semestral | 6 meses | **R$ 269,40** | R$ 44,90 | Até 8 cursos elegíveis |
+| Anual | 12 meses | **R$ 478,80** | R$ 39,90 | Todos os elegíveis |
+
+**Não há vendas, cobrança recorrente, checkout, aprovação de pagamento ou liberação de assinatura nesta versão.** Os botões mostram `Contratação em breve`. Matrículas gratuitas em cursos com preço positivo são bloqueadas no backend para evitar acesso pago indevido.
+
+O programa de fidelidade **gratuito** contabiliza **100 pontos por curso concluído** e classifica os estudantes em **Bronze** (0–1), **Prata** (2–4) e **Ouro** (5 ou mais). Pontos ainda **não podem ser trocados por descontos, dinheiro ou benefícios comerciais**.
+
+Detalhes: [Preços, planos e fidelidade](docs/ETAPA10_PRECOS_PLANOS_FIDELIDADE.md).
+
+## Redes sociais e compartilhamento
+
+A área **Comunidade & Conexões** foi preparada para YouTube, Instagram, LinkedIn, GitHub, Facebook, TikTok e WhatsApp profissional. **Os perfis oficiais serão criados/configurados depois**; os campos vazios aparecem como `Em breve`.
+
+Os endereços ficam em [`frontend/public/social-links.json`](frontend/public/social-links.json). Por enquanto, apenas o GitHub está configurado.
+
+É possível copiar links da home e de cursos. Compartilhamento público por WhatsApp/LinkedIn exige que o CursoHub esteja hospedado em um **domínio HTTPS real**; `localhost` não é acessível para outras pessoas. Não são necessários tokens de redes sociais.
+
+Leia o [guia de redes sociais e compartilhamento](docs/REDES_SOCIAIS_COMPARTILHAMENTO.md).
 
 ## Testes e qualidade
 
+A automação do GitHub Actions executa testes Java com Maven, verificação das fronteiras arquiteturais, compilação React/TypeScript e testes de integração com PostgreSQL e JWT.
+
 ```powershell
+# Na raiz do projeto
 python scripts/check_architecture.py
+
 cd backend
-mvn test
+mvn verify
+
 cd ../frontend
 npm install
 npm run build
 ```
 
-A verificação de fronteiras arquiteturais passou no ambiente de geração. A compilação integral e o funcionamento integrado exigem uma execução com Maven, dependências npm e Docker no ambiente local ou no CI.
+**Workflows:** [CI Java/React](.github/workflows/ci.yml) · [Integração com PostgreSQL/JWT](.github/workflows/auth-integration.yml).
 
-## Segurança
+> Testes automatizados aprovados são evidência da implementação, **não uma certificação de prontidão para produção**. Também é necessária homologação visual e funcional em ambiente real.
 
-- **Não versionar** `.env`, tokens, chaves ou senhas de produção.
-- A identidade fictícia no seed está inativa, com senha inutilizável.
-- A porta do PostgreSQL não é publicada no `compose.yaml` padrão. Para clientes locais no Windows, o override opcional `compose.local-db-port.yaml` expõe `127.0.0.1:5433`.
-- **Não existem endpoints de escrita sem autenticação** na primeira etapa.
-- Antes de produção: Spring Security, JWT, RBAC, proteção de mídia, LGPD, backups, logs e monitoramento.
+## Segurança e limitações
 
-## Próximos passos
+- Cadastro público exclusivo para alunos; o perfil `INSTRUCTOR` não é selecionável no formulário público.
+- Senhas armazenadas com **BCrypt**; autenticação via JWT assinado, com duração curta (15 minutos).
+- A identidade de usuário é obtida do token validado, e não de IDs enviados pelo navegador.
+- O frontend mantém o token de acesso em memória, não em `localStorage`.
+- Materiais e vídeos exigem permissão e matrícula compatíveis; o download não recebe JWT na URL.
+- Uploads têm limites e verificações de tipo. O armazenamento `BYTEA` no PostgreSQL é **adequado ao MVP**, não à operação em escala.
+- A porta do PostgreSQL não fica exposta no Compose padrão.
+- **Antes de produção:** configurar HTTPS/domínio, backup e restauração, observabilidade, gestão de segredos, limites de uso, recuperação de senha, verificação de e-mail, política de privacidade/LGPD, proteção de mídia e um provedor de pagamento com confirmação confiável.
 
-1. Executar a stack, validar banco, endpoints, interface e testes.
-2. Desenvolver cadastro de usuários, autenticação e autorização.
-3. Implementar cursos, módulos, aulas e matrículas.
-4. Construir avaliações, progresso e certificados.
+## Documentação e roadmap
 
-**Documentação principal:** [Arquitetura](docs/ARQUITETURA.md) · [Regras de negócio](docs/REGRAS_DE_NEGOCIO.md) · [Guia prático do vídeo](docs/GUIA_PRATICO_VIDEO.md) · [Roadmap](docs/ROADMAP.md).
+| Documento | Conteúdo |
+|---|---|
+| [Arquitetura técnica](docs/ARQUITETURA_TECNICA.md) | Componentes, dependências e implantação |
+| [Modelo relacional](docs/MODELO_RELACIONAL.md) | DER, dicionário e regras de persistência |
+| [Regras de negócio](docs/REGRAS_DE_NEGOCIO.md) | Entidades e restrições funcionais |
+| [Autenticação](docs/ETAPA2_AUTENTICACAO.md) | Cadastro, login e JWT |
+| [Painel do estudante](docs/ETAPA3_DASHBOARD_ALUNO.md) | Matrículas e indicadores |
+| [Aulas e progresso](docs/ETAPA5_AULAS_E_PROGRESSO.md) | Acompanhamento de aprendizagem |
+| [Estúdio do Instrutor](docs/ETAPA6_AREA_INSTRUTOR.md) | Autoria e publicação |
+| [Materiais e vídeos](docs/ETAPA7_ANEXOS_VIDEO_SEQUENCIAL.md) | Uploads, reprodução e bloqueio |
+| [Capas dos cursos](docs/ETAPA9_CAPA_DO_CURSO.md) | Imagens e regras de acesso |
+| [Home editorial](docs/HOME_EDITORIAL_TECH_FIAP_INSPIRED.md) | Design e homologação |
+| [Roadmap](docs/ROADMAP.md) | Evolução planejada do produto |
+
+**Próximos marcos:** validar e integrar avaliações/certificados (PR #7), implementar checkout seguro, ativação e expiração de assinaturas, melhorar a acessibilidade e publicar a plataforma em domínio próprio.
+
+### Histórico de entregas
+
+As funcionalidades abaixo foram consolidadas na `main`, respeitando a sequência de dependências:
+
+- [#8 — Capa dos cursos](https://github.com/juceliocoelho2022/cursohub-lms./pull/8).
+- [#9 — Preços, planos e fidelidade](https://github.com/juceliocoelho2022/cursohub-lms./pull/9).
+- [#10 — Home premium](https://github.com/juceliocoelho2022/cursohub-lms./pull/10).
+- [#11 — Home editorial tech](https://github.com/juceliocoelho2022/cursohub-lms./pull/11).
+- [#12 — Redes sociais, compartilhamento e documentação](https://github.com/juceliocoelho2022/cursohub-lms./pull/12).
+
+O [PR #7 — Avaliações e certificados](https://github.com/juceliocoelho2022/cursohub-lms./pull/7) continua independente e **não foi integrado** nesta entrega.
+
+---
+
+**Idealização e desenvolvimento:** [Professor Jucelio Coelho](https://github.com/juceliocoelho2022)  
+**Projeto:** [CursoHub LMS](https://github.com/juceliocoelho2022/cursohub-lms.) · Educação, tecnologia e aprendizagem contínua.

@@ -1212,3 +1212,79 @@
 @media (prefers-reduced-motion:reduce){
  .ch-track-card,.ch-btn-main,.ch-btn-ghost,.ch-statement-cta{transition:none}
 }
+
+
+/* CursoHub — redes sociais e compartilhamento de cursos; visual editorial original */
+.ch-social-hub{background:#080a12;color:#f6f8ff;padding:100px 0 106px;position:relative;overflow:hidden;
+ border-top:1px solid #e34a9340}
+.ch-social-hub:before{content:'';position:absolute;pointer-events:none;right:-180px;top:-230px;
+ width:700px;height:700px;background:radial-gradient(circle,#dc308019,transparent 62%)}
+.ch-social-container{max-width:1280px;position:relative;display:grid;grid-template-columns:.98fr 1.02fr;gap:65px;align-items:start}
+.ch-social-eyebrow{font-size:11px;letter-spacing:2.2px;font-weight:900;color:#e966a7}
+.ch-social-copy h2{font:900 clamp(62px,6.6vw,92px)/.9 'Barlow Condensed',Impact,sans-serif;
+ letter-spacing:0;text-transform:uppercase;margin:25px 0}
+.ch-social-copy h2 em{font-style:normal;color:#e34a93}
+.ch-social-copy>p{max-width:470px;color:#b7bdc8;font-size:14px;line-height:1.85;margin:0 0 35px}
+.ch-social-panel{border:1px solid #464253;background:#151723;box-shadow:20px 26px 0 #e34a9309}
+.ch-social-panel-top{display:flex;align-items:center;justify-content:space-between;gap:15px;
+ padding:23px 26px;border-bottom:1px solid #373744;font-size:11px;letter-spacing:1.5px;font-weight:900;color:#f7f7fb}
+.ch-social-panel-top>span:last-child{color:#e34a93;font-size:22px}
+.ch-social-networks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.ch-social-network{display:flex;align-items:center;gap:13px;min-width:0;min-height:101px;padding:18px 17px;
+ color:#f0f2f7;border-bottom:1px solid #363442;transition:background .18s ease}
+.ch-social-network:nth-child(odd){border-right:1px solid #363442}
+a.ch-social-network:hover{background:#322237}
+a.ch-social-network:focus-visible{outline:2px solid #9bedbd;outline-offset:-4px}
+.ch-social-network-symbol{width:40px;height:40px;flex:none;display:grid;place-items:center;
+ border:1px solid #e34a935a;background:#e34a931a;color:#f089bb;font-size:18px;font-weight:900;
+ border-radius:10px;font-family:'DM Sans',sans-serif}
+.ch-social-network-github{font:900 11px Consolas,monospace}
+.ch-social-network-linkedin{font-size:18px}
+.ch-social-network-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ch-social-network-text strong{font-size:13px;font-weight:800}
+.ch-social-network-text small{font-size:10px;color:#aeb5c3;line-height:1.5}
+.ch-social-network-arrow{margin-left:auto;color:#9bedbd;font-size:19px}
+.ch-social-network-soon{opacity:.57}
+.ch-social-soon{font-size:9px;color:#b9b3bd;margin-left:auto;letter-spacing:.8px;white-space:nowrap}
+.ch-social-notice{font-size:11px;color:#c0b7c3;padding:12px 19px;margin:0}
+.social-share{margin:25px 0 0}
+.social-share-heading{font-size:10px;letter-spacing:1.5px;font-weight:900;margin:0 0 13px;color:#d7d9e1}
+.social-share-actions{display:flex;flex-wrap:wrap;gap:9px}
+.social-share-actions button{min-height:42px;border:1px solid #645363;background:#191822;color:#f3f3f9;
+ border-radius:0;padding:10px 13px;font-size:11px;font-weight:800;transition:border-color .18s}
+.social-share-actions button:hover:not(:disabled){border-color:#e34a93;color:#ff9bcc;background:#251c2b}
+.social-share-actions button:focus-visible{outline:3px solid #9bedbd;outline-offset:3px}
+.social-share-actions button:disabled{opacity:.4;cursor:not-allowed}
+.social-share-hint{font-size:11px;line-height:1.6;color:#adb0bb;margin:14px 0 0;max-width:485px}
+.social-share-feedback{font-size:11px;color:#a9efd4;line-height:1.6;margin:12px 0 0}
+.social-share-compact{padding:15px 0;margin:17px 0 5px;border-top:1px solid var(--course-border)}
+.social-share-compact .social-share-heading{color:var(--course-muted)}
+.social-share-compact .social-share-actions button{border:1px solid var(--course-border);
+ background:var(--course-soft);color:var(--course-text);border-radius:8px}
+.social-share-compact .social-share-actions button:hover:not(:disabled){color:var(--course-accent);
+ border-color:var(--course-accent);background:var(--course-card)}
+.social-share-compact .social-share-hint{color:var(--course-muted)}
+.social-share-compact .social-share-feedback{color:var(--course-accent)}
+.ch-footer-meta{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.ch-footer-meta a{font-size:11px;font-weight:800;color:#9bedbd}
+.ch-footer-meta a:hover{text-decoration:underline}
+@media(max-width:1020px){
+ .ch-social-container{grid-template-columns:1fr;gap:35px}
+ .ch-social-copy h2{max-width:700px}
+ .ch-social-hub{padding:75px 0}
+}
+@media(max-width:610px){
+ .ch-social-hub{padding:60px 0}
+ .ch-social-copy h2{font-size:clamp(55px,14vw,80px)}
+ .ch-social-networks{grid-template-columns:1fr}
+ .ch-social-network:nth-child(odd){border-right:0}
+ .ch-social-network{min-height:80px;padding:14px 18px}
+ .ch-social-panel-top{padding:17px}
+ .social-share-actions button{flex:1}
+ .ch-footer-meta{gap:10px;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){.ch-social-network,.social-share-actions button{transition:none}}
+
+@media(min-width:611px){
+  .ch-social-network:last-child:nth-child(odd){grid-column:1 / -1;border-right:0}
+}
