@@ -44,6 +44,8 @@ public final class InstructorStudioService implements InstructorStudioUseCase {
             throw new InvalidInstructorContentException("Preço deve ficar entre R$ 0,00 e R$ 20.000,00");
         if (command.estimatedMinutes() < 0 || command.estimatedMinutes() > 100000)
             throw new InvalidInstructorContentException("Duração estimada inválida");
+        if(command.priceCents()<0 || command.priceCents()>2000000)
+            throw new InvalidInstructorContentException("Preço deve estar entre R$ 0,00 e R$ 20.000,00");
         return store.createDraft(instructorId, new CreateCourseCommand(
                 command.slug(), title, description, category, command.level(), command.estimatedMinutes(),command.priceCents()));
     }
