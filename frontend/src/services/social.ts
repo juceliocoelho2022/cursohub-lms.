@@ -8,6 +8,7 @@ export const networks: {key:SocialNetwork; label:string; icon:string; descriptio
   {key:'github',label:'GitHub',icon:'</>',description:'Projetos e código'},
   {key:'facebook',label:'Facebook',icon:'f',description:'Comunidade e novidades'},
   {key:'tiktok',label:'TikTok',icon:'♪',description:'Conteúdos rápidos'},
+  {key:'whatsapp',label:'WhatsApp',icon:'◉',description:'Contato e comunidade'},
 ]
 
 const allowedHosts:Record<SocialNetwork,string[]> = {
