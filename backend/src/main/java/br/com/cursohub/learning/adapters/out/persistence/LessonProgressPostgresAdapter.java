@@ -27,7 +27,7 @@ public class LessonProgressPostgresAdapter implements LessonProgressWriterPort {
            AND NOT EXISTS (
              SELECT 1 FROM lessons prior JOIN course_modules pm ON pm.id=prior.module_id
              LEFT JOIN lesson_progress pp ON pp.lesson_id=prior.id AND pp.enrollment_id=e.id
-             WHERE pm.course_id=c.id AND prior.is_required=TRUE AND pp.id IS NULL
+             WHERE pm.course_id=c.id AND (prior.is_required=TRUE OR prior.kind='VIDEO') AND pp.id IS NULL
                AND (pm.position<m.position OR (pm.position=m.position AND prior.position<l.position))
            )
         ON CONFLICT (enrollment_id, lesson_id) DO NOTHING
