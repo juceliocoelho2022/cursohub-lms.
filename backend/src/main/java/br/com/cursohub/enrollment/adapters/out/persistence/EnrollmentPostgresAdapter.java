@@ -2,6 +2,7 @@ package br.com.cursohub.enrollment.adapters.out.persistence;
 
 import br.com.cursohub.enrollment.application.exception.CourseUnavailableException;
 import br.com.cursohub.enrollment.application.exception.EnrollmentConflictException;
+import br.com.cursohub.enrollment.application.exception.PaidCourseRequiresCheckoutException;
 import br.com.cursohub.enrollment.application.model.EnrollmentReceipt;
 import br.com.cursohub.enrollment.application.port.out.EnrollmentWriterPort;
 import java.util.List;
@@ -20,7 +21,7 @@ public class EnrollmentPostgresAdapter implements EnrollmentWriterPort {
         INSERT INTO enrollments (id, student_id, course_id, status)
         SELECT gen_random_uuid(), ?, c.id, 'ACTIVE'
           FROM courses c
-         WHERE c.slug = ? AND c.status = 'PUBLICADO'
+         WHERE c.slug = ? AND c.status = 'PUBLICADO' AND c.price_cents = 0
         ON CONFLICT (student_id, course_id) DO NOTHING
         RETURNING id, course_id, status
         """;
@@ -57,7 +58,13 @@ public class EnrollmentPostgresAdapter implements EnrollmentWriterPort {
                         rs.getObject("id", UUID.class), rs.getObject("course_id", UUID.class),
                         courseSlug, rs.getString("status"), false),
                 studentId, courseSlug);
-        if (previous.isEmpty()) throw new CourseUnavailableException();
+        if(previous.isEmpty()) {
+            Integer price=jdbc.queryForObject("""
+                SELECT price_cents FROM courses WHERE slug=? AND status='PUBLICADO'
+                """,Integer.class,courseSlug);
+            if(price!=null && price>0)throw new PaidCourseRequiresCheckoutException();
+            throw new CourseUnavailableException();
+        }
         EnrollmentReceipt current = previous.getFirst();
         if ("CANCELLED".equals(current.status())) throw new EnrollmentConflictException();
         return current;
