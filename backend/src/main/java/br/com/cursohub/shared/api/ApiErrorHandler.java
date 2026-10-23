@@ -71,6 +71,11 @@ public class ApiErrorHandler {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body("Limite de upload: 30 MB"));
     }
 
+    @ExceptionHandler(br.com.cursohub.cover.application.CoverValidationException.class)
+    ResponseEntity<Map<String,Object>> coverInvalid(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(ex.getMessage()));
+    }
+
     @ExceptionHandler({DuplicateEmailException.class})
     ResponseEntity<Map<String, Object>> handleDuplicate(DuplicateEmailException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body(ex.getMessage()));

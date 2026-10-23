@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { CourseThemeSelector } from './CourseThemeSelector'
 import { CourseAssetsPanel } from './CourseAssetsPanel'
+import { CourseCoverPicker } from './CourseCoverPicker'
+import { CourseCoverEditor } from './CourseCoverEditor'
+import {uploadCourseCover} from '../services/courseCover'
 import type { CourseTheme } from '../services/courseTheme'
 import { instructorApi } from '../services/instructor'
 import type { CourseDraftForm, InstructorCourse, InstructorCourseContent, LessonForm } from '../services/instructor'
@@ -27,6 +30,8 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [content, setContent] = useState<InstructorCourseContent | null>(null)
   const [draft, setDraft] = useState<CourseDraftForm>(emptyDraft)
+  const [draftCover,setDraftCover] = useState<File|null>(null)
+  const [coverRevision,setCoverRevision] = useState(0)
   const [moduleTitle, setModuleTitle] = useState('')
   const [moduleId, setModuleId] = useState('')
   const [lesson, setLesson] = useState<LessonForm>(emptyLesson)
@@ -74,7 +79,20 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
       const course = await instructorApi.create(token, draft)
       setDraft(emptyDraft)
       await refresh(course.id)
-      setNotice('Curso criado como rascunho. Agora adicione módulos e aulas.')
+      if(draftCover){
+        try{
+          await uploadCourseCover(token,course.id,draftCover)
+          setCoverRevision(v=>v+1)
+          setDraftCover(null)
+          setNotice('Curso e imagem de capa salvos! Agora adicione módulos e aulas.')
+        }catch(err){
+          setDraftCover(null)
+          setNotice('Curso criado como rascunho. Você poderá enviar novamente a imagem no editor de capa.')
+          setError(err instanceof Error?err.message:'Não foi possível enviar a imagem de capa.')
+        }
+      }else{
+        setNotice('Curso criado como rascunho. Agora adicione módulos e aulas.')
+      }
     })
   }
 
@@ -180,6 +198,7 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                 <input type="number" min={0} max={100000} required value={draft.estimatedMinutes}
                        onChange={e => setDraft(v => ({ ...v, estimatedMinutes: Number(e.target.value) }))}/>
               </label>
+              <CourseCoverPicker file={draftCover} onSelect={setDraftCover}/>
               <button className="primary-btn" disabled={busy} type="submit">Criar rascunho +</button>
             </form>
           </section>
@@ -204,6 +223,7 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                   {editable && <button type="button" className="primary-btn"
                         disabled={busy} onClick={publishCourse}>Publicar curso ↗</button>}
                 </div>
+                <CourseCoverEditor key={`${content.course.id}-${coverRevision}`} token={token} courseId={content.course.id}/>
                 {editable && (
                   <>
                     <form className="instructor-inline-form" onSubmit={createModule}>

@@ -709,3 +709,36 @@
   font-size: 13px;
   margin: 0 0 20px;
 }
+
+
+/* Etapa 9 — capa de curso no Estúdio e catálogo */
+.course-cover-picker{display:flex;flex-direction:column;gap:8px;min-width:0}
+.course-cover-picker>label{
+  display:flex;flex-direction:column;gap:8px;font-size:12px;
+  font-weight:800;color:var(--course-text)
+}
+.course-cover-picker input[type="file"]{
+  width:100%;min-width:0;padding:12px;border:1px solid var(--course-border);
+  border-radius:9px;background:var(--course-input);color:var(--course-text);font-size:12px
+}
+.course-cover-picker input:focus-visible{outline:2px solid var(--course-accent);outline-offset:2px}
+.course-cover-help{font-size:11px;color:var(--course-muted);line-height:1.6}
+.course-cover-preview{margin:8px 0;display:flex;flex-direction:column;gap:9px}
+.course-cover-preview img,.course-cover-current{
+  display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;
+  background:var(--course-soft);border:1px solid var(--course-border)
+}
+.course-cover-preview figcaption{font-size:11px;color:var(--course-muted);overflow-wrap:anywhere}
+.course-cover-preview button{align-self:flex-start}
+.course-cover-editor{border:1px solid var(--course-border);background:var(--course-soft);
+  border-radius:13px;padding:20px;display:flex;flex-direction:column;gap:13px;margin-bottom:26px}
+.course-cover-editor h3{margin:0;color:var(--course-text);font-size:17px}
+.course-cover-editor p{color:var(--course-muted);font-size:12px;line-height:1.6;margin:0}
+.course-cover-editor>.secondary-btn{align-self:flex-start}
+.course-cover-photo{background:var(--course-soft)}
+.course-cover-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.course-modal-cover{
+  display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
+  border-radius:12px;margin:10px 0 20px;background:var(--course-soft)
+}
+@media(max-width:600px){.course-cover-editor{padding:14px}}
