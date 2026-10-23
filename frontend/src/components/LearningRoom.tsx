@@ -3,6 +3,7 @@ import type { CourseTheme } from '../services/courseTheme'
 import { CourseThemeSelector } from './CourseThemeSelector'
 import { ProtectedVideoPlayer } from './ProtectedVideoPlayer'
 import { CourseDownloadMaterials } from './CourseDownloadMaterials'
+import { CourseAssessment } from './CourseAssessment'
 import { listStudentAssets } from '../services/assets'
 import type { CourseAsset } from '../services/assets'
 import { MarkdownLessonContent } from './MarkdownLessonContent'
@@ -182,6 +183,7 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                 )}
               </section>
             </div>
+            <CourseAssessment token={token} slug={slug} courseProgress={course.progressPercent}/>
           </>
         )}
       </div>
