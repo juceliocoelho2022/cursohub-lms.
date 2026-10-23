@@ -647,3 +647,6 @@
   .learning-markdown pre { padding: 13px; }
   .learning-markdown pre code { font-size: 12px; }
 }
+
+/* Dica de formatação para instrutores de aulas em Markdown */
+.instructor-markdown-hint{display:block;color:var(--course-muted);font-size:11px;font-weight:400;line-height:1.6;margin-top:4px}
