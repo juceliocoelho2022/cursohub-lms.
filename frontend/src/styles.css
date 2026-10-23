@@ -65,3 +65,6 @@
 .dashboard-lessons{font-size:12px;color:#82909d;margin:13px 0 0}
 @media(max-width:750px){.dashboard-heading{flex-direction:column;align-items:flex-start}.dashboard-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.dashboard-stat{padding:15px}.stat-value{font-size:30px}.stat-label{font-size:11px}.dashboard-course-grid{grid-template-columns:1fr}}
 @media(max-width:450px){.dashboard-main{padding:35px 0 65px}.dashboard-breadcrumb{margin-bottom:25px}.dashboard-stats{grid-template-columns:1fr}.dashboard-stat{flex-direction:row;align-items:center;gap:18px}.stat-icon{margin:0}.stat-label{margin-left:auto}.dashboard-empty{padding:37px 17px}.account-greeting{display:none}}
+
+/* Matrícula: ação secundária nos detalhes de curso */
+.modal-secondary{display:block;width:100%;margin-top:12px;text-align:center}
