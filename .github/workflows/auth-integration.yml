@@ -292,11 +292,12 @@ jobs:
 
           # Capa PNG: upload apenas pelo dono, invisível enquanto RASCUNHO.
           printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/BaAAAAAASUVORK5CYII=' | base64 -d > /tmp/curso-cover.png
+          printf 'Isto nao e uma imagem PNG' > /tmp/cover-invalid.png
           code=$(curl -sS -o /tmp/cover-invalid.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
-            -F 'file=@/tmp/ci-material.pdf;filename=capa.png;type=image/png' \
-            "$INSTRUCTOR_URL/$OWN_COURSE_ID/cover" || true)
-          [[ "$code" != "201" ]] || { echo "Capa com assinatura falsa foi aceita"; exit 1; }
+            -F 'file=@/tmp/cover-invalid.png;type=image/png' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/cover")
+          [[ "$code" == "400" ]] || { echo "Capa com assinatura falsa: $code (esperado 400)"; exit 1; }
 
           code=$(curl -sS -o /tmp/cover-upload.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
