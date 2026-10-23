@@ -33,10 +33,16 @@ Test-Endpoint "Pagina inicial" $BaseUrl {
 
 Test-Endpoint "Saude da API" "$BackendUrl/actuator/health" {
     param($response)
-    $health = ConvertFrom-Json -InputObject ([string]$response.Content)
+    # Spring Actuator can return application/vnd.spring-boot.actuator.v3+json
+    # as byte[] in Windows PowerShell 5.1. Decode before parsing JSON.
+    $rawBody = $response.Content
+    if ($rawBody -is [byte[]]) {
+        $rawBody = [System.Text.Encoding]::UTF8.GetString($rawBody)
+    }
+    $health = ConvertFrom-Json -InputObject ([string]$rawBody)
     $actualStatus = [string]$health.status
     if ($actualStatus.Trim() -ne 'UP') {
-        throw ("Healthcheck inesperado: status='{0}', resposta='{1}'" -f $actualStatus, [string]$response.Content)
+        throw ("Healthcheck inesperado: status='{0}', resposta='{1}'" -f $actualStatus, [string]$rawBody)
     }
 }
 
