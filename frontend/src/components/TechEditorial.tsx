@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 
 interface TechEditorialProps {
+  children?: ReactNode
   onExplore: () => void
   onPlans: () => void
   onSearch: (term: string) => void
@@ -37,7 +39,7 @@ const tracks = [
   },
 ]
 
-export function TechEditorial({onExplore,onPlans,onCategory,onSearch}:TechEditorialProps) {
+export function TechEditorial({onExplore,onPlans,onCategory,onSearch,children}:TechEditorialProps) {
   const [query, setQuery] = useState('')
   return <>
     <section className="ch-fiap-hero" aria-labelledby="ch-hero-heading">
@@ -115,6 +117,8 @@ export function TechEditorial({onExplore,onPlans,onCategory,onSearch}:TechEditor
         <span>CLOUD</span>
       </div>
     </div>
+
+    {children}
 
     <section className="ch-learning-tracks" aria-labelledby="ch-learning-heading">
       <div className="container">
