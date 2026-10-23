@@ -202,8 +202,7 @@ export default function App() {
           />
         : <main id="inicio">
         <TechEditorial onExplore={scrollToCourses} onPlans={scrollToPlans} onSearch={searchFromHero}
-          onCategory={value=>{setCategory(value);setLevel('');setSearch('');scrollToCourses()}}/>
-
+          onCategory={value=>{setCategory(value);setLevel('');setSearch('');scrollToCourses()}}>
         <section className="catalog-section" id="cursos" ref={coursesSection}>
           <div className="container">
             <div className="section-topline"><span className="mini-rule" /> 03 / NOSSOS CURSOS</div>
@@ -263,6 +262,9 @@ export default function App() {
             )}
           </div>
         </section>
+
+        </TechEditorial>
+
 
         <MembershipPlans onExplore={scrollToCourses} token={session?.role==='STUDENT'?session.accessToken:undefined}/>
 
