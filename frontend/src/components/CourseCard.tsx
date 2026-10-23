@@ -1,5 +1,6 @@
 import type { Course } from '../services/catalog'
 import { formatDuration, levels } from '../services/catalog'
+import { publicCoverUrl } from '../services/courseCover'
 
 interface CourseCardProps {
   course: Course
@@ -14,14 +15,19 @@ const covers: Record<string, { symbol: string; theme: string; eyebrow: string }>
 
 export function CourseCard({ course, onView }: CourseCardProps) {
   const cover = covers[course.category] ?? { symbol: '✦', theme: 'orange', eyebrow: course.category.toUpperCase() }
+  const coverImage = publicCoverUrl(course.thumbnailUrl)
 
   return (
     <article className="course-card">
-      <div className={`course-cover cover-${cover.theme}`}>
-        <div className="cover-orbit" />
-        <span className="cover-eyebrow">{cover.eyebrow}</span>
-        <span className="cover-symbol" aria-hidden="true">{cover.symbol}</span>
-        <span className="cover-footnote">CURSOHUB • ACADEMY</span>
+      <div className={`course-cover cover-${cover.theme} ${coverImage?'course-cover-photo':''}`}>
+        {coverImage
+          ? <img src={coverImage} loading="lazy" alt={`Capa do curso ${course.title}`}/>
+          : <>
+              <div className="cover-orbit" />
+              <span className="cover-eyebrow">{cover.eyebrow}</span>
+              <span className="cover-symbol" aria-hidden="true">{cover.symbol}</span>
+              <span className="cover-footnote">CURSOHUB • ACADEMY</span>
+            </>}
       </div>
       <div className="course-content">
         <div className="course-meta">
