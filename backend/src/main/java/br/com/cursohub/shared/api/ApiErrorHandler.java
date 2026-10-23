@@ -71,6 +71,21 @@ public class ApiErrorHandler {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body("Limite de upload: 30 MB"));
     }
 
+    @ExceptionHandler(br.com.cursohub.assessment.application.AssessmentValidationException.class)
+    ResponseEntity<Map<String,Object>> assessmentBadRequest(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(ex.getMessage()));
+    }
+
+    @ExceptionHandler(br.com.cursohub.assessment.application.AssessmentNotFoundException.class)
+    ResponseEntity<Map<String,Object>> assessmentMissing(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body(ex.getMessage()));
+    }
+
+    @ExceptionHandler(br.com.cursohub.assessment.application.AssessmentConflictException.class)
+    ResponseEntity<Map<String,Object>> assessmentConflict(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body(ex.getMessage()));
+    }
+
     @ExceptionHandler({DuplicateEmailException.class})
     ResponseEntity<Map<String, Object>> handleDuplicate(DuplicateEmailException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body(ex.getMessage()));
