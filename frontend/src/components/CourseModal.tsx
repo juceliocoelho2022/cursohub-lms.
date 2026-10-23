@@ -87,10 +87,10 @@ export function CourseModal({ course, session, theme, onThemeChange, onClose, on
         </div>
         {error && <p className="inline-error" role="alert">{error}</p>}
 
-        {!session ? (
+        {details.priceCents>0 ? (
+          <p className="modal-paid-notice">Este curso é pago. Estamos preparando a contratação segura; ainda não é possível comprá-lo nem realizar matrícula.</p>
+        ) : !session ? (
           <button type="button" className="primary-btn full" onClick={onRequestLogin}>Entre para se matricular ↗</button>
-        ) : session.role === 'STUDENT' && details.priceCents>0 ? (
-          <p className="modal-paid-notice">Este curso é pago. Estamos preparando a contratação segura; ainda não é possível comprá-lo.</p>
         ) : session.role === 'STUDENT' ? (
           <button type="button" className="primary-btn full" onClick={handleEnrollment} disabled={busy}>
             {busy ? 'Realizando matrícula...' : 'Matricular-se gratuitamente ↗'}
