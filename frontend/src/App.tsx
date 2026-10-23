@@ -6,6 +6,7 @@ import { loadCourseTheme, saveCourseTheme } from './services/courseTheme'
 import type { CourseTheme } from './services/courseTheme'
 import { AuthDialog } from './components/AuthDialog'
 import { StudentDashboard } from './components/StudentDashboard'
+import { LearningRoom } from './components/LearningRoom'
 import type { AuthMode } from './components/AuthDialog'
 import { currentUser } from './services/auth'
 import type { AuthSession, CurrentUser } from './services/auth'
@@ -32,7 +33,8 @@ export default function App() {
   const [authMode, setAuthMode] = useState<AuthMode | null>(null)
   const [session, setSession] = useState<AuthSession | null>(null)
   const [currentProfile, setCurrentProfile] = useState<CurrentUser | null>(null)
-  const [view, setView] = useState<'catalog' | 'dashboard'>('catalog')
+  const [view, setView] = useState<'catalog' | 'dashboard' | 'learning'>('catalog')
+  const [activeLearningSlug, setActiveLearningSlug] = useState<string | null>(null)
   const [scrollTarget, setScrollTarget] = useState<'courses' | 'about' | null>(null)
 
   useEffect(() => saveCourseTheme(courseTheme), [courseTheme])
@@ -128,12 +130,25 @@ export default function App() {
         </div>
       </header>
 
-      {view === 'dashboard' && session?.role === 'STUDENT'
+      {view === 'learning' && session?.role === 'STUDENT' && activeLearningSlug
+        ? <LearningRoom
+            slug={activeLearningSlug}
+            token={session.accessToken}
+            theme={courseTheme}
+            onThemeChange={setCourseTheme}
+            onBack={() => { setView('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+          />
+        : view === 'dashboard' && session?.role === 'STUDENT'
         ? <StudentDashboard
             token={session.accessToken}
             name={currentProfile?.name || session.name}
             onExplore={scrollToCourses}
             onLogout={logout}
+            onOpenCourse={slug => {
+              setActiveLearningSlug(slug)
+              setView('learning')
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
             theme={courseTheme}
             onThemeChange={setCourseTheme}
           />

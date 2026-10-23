@@ -30,6 +30,17 @@ public class ApiErrorHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(ex.getMessage()));
     }
 
+    @ExceptionHandler({br.com.cursohub.learning.application.exception.LearningCourseUnavailableException.class,
+                       br.com.cursohub.learning.application.exception.LessonUnavailableException.class})
+    ResponseEntity<Map<String, Object>> handleLearningNotFound(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body(ex.getMessage()));
+    }
+
+    @ExceptionHandler(br.com.cursohub.learning.application.exception.InvalidLearningRequestException.class)
+    ResponseEntity<Map<String, Object>> handleInvalidLearning(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(ex.getMessage()));
+    }
+
     @ExceptionHandler({DuplicateEmailException.class})
     ResponseEntity<Map<String, Object>> handleDuplicate(DuplicateEmailException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body(ex.getMessage()));

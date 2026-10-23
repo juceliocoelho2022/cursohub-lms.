@@ -8,12 +8,13 @@ interface Props {
   token: string
   name: string
   onExplore: () => void
+  onOpenCourse: (slug: string) => void
   onLogout: () => void
   theme: CourseTheme
   onThemeChange: (theme: CourseTheme) => void
 }
 
-export function StudentDashboard({ token, name, onExplore, onLogout, theme, onThemeChange }: Props) {
+export function StudentDashboard({ token, name, onExplore, onOpenCourse, onLogout, theme, onThemeChange }: Props) {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -115,6 +116,10 @@ export function StudentDashboard({ token, name, onExplore, onLogout, theme, onTh
                         ? 'Ainda não há aulas obrigatórias cadastradas.'
                         : `${course.completedLessons} de ${course.requiredLessons} aulas concluídas`}
                     </p>
+                    <button className="secondary-btn learning-open-btn" type="button"
+                            onClick={() => onOpenCourse(course.slug)}>
+                      Acessar aulas ↗
+                    </button>
                   </article>
                 ))}
               </div>

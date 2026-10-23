@@ -332,3 +332,151 @@
 @media (prefers-reduced-motion: reduce) {
   .course-theme-option { transition: none; }
 }
+
+
+/* Etapa 5 — sala de aula com temas compartilhados do CursoHub */
+.app-shell .learning-main {
+  background: var(--course-bg, #f7f9fb);
+  color: var(--course-text, #17243a);
+  min-height: calc(100vh - 164px);
+  padding: 38px 0 95px;
+}
+.learning-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:30px;
+}
+.learning-header {
+  padding:29px 34px;
+  border:1px solid var(--course-border);
+  background:var(--course-card);
+  box-shadow:var(--course-shadow);
+  border-radius:18px;
+  margin-bottom:24px;
+}
+.learning-header h1 {
+  color:var(--course-text);
+  font:800 clamp(25px,3vw,37px) 'Plus Jakarta Sans',sans-serif;
+  letter-spacing:-1px;
+  margin:14px 0 25px;
+}
+.learning-header-progress {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  font-size:13px;
+  color:var(--course-muted);
+}
+.learning-header-progress strong {
+  color:var(--course-accent);
+  font-size:18px;
+}
+.learning-header .dashboard-progress-track {margin:12px 0 0}
+.learning-layout {
+  display:grid;
+  grid-template-columns:minmax(245px, .37fr) minmax(0, 1fr);
+  align-items:start;
+  gap:22px;
+}
+.learning-sidebar,.learning-content {
+  border:1px solid var(--course-border);
+  border-radius:17px;
+  background:var(--course-card);
+  color:var(--course-text);
+  box-shadow:var(--course-shadow);
+}
+.learning-sidebar {padding:22px;position:sticky;top:20px;max-height:calc(100vh - 50px);overflow-y:auto}
+.learning-sidebar h2{font:800 16px 'Plus Jakarta Sans',sans-serif;margin:0 0 24px}
+.learning-module{margin:0 0 23px}
+.learning-module h3{font-size:13px;font-weight:800;color:var(--course-text);margin:0 0 12px}
+.learning-empty-module{color:var(--course-muted);font-size:12px}
+.learning-lesson-nav {
+  display:flex;
+  width:100%;
+  align-items:center;
+  gap:9px;
+  padding:12px;
+  margin:4px 0;
+  text-align:left;
+  border:1px solid transparent;
+  border-radius:10px;
+  background:transparent;
+  color:var(--course-muted);
+  font-size:12px;
+}
+.learning-lesson-nav>span:first-child{color:var(--course-accent);font-size:17px;min-width:16px}
+.learning-lesson-nav:hover,
+.learning-lesson-nav.is-active {
+  background:var(--course-soft);
+  color:var(--course-text);
+  border-color:var(--course-border);
+}
+.learning-lesson-nav:focus-visible,.learning-open-btn:focus-visible,.learning-resource-link:focus-visible {
+  outline:3px solid var(--course-accent);
+  outline-offset:2px;
+}
+.learning-content{padding:33px;min-height:310px}
+.learning-lesson-eyebrow{color:var(--course-accent);font-size:11px;letter-spacing:1.4px;font-weight:800}
+.learning-content h2{font:800 clamp(22px,2.5vw,29px) 'Plus Jakarta Sans',sans-serif;color:var(--course-text);margin:14px 0 27px}
+.learning-reading {
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  line-height:1.85;
+  font-size:15px;
+  color:var(--course-text);
+  background:var(--course-soft);
+  border:1px solid var(--course-border);
+  border-radius:12px;
+  padding:26px;
+  min-height:170px;
+}
+.learning-resource {
+  border:1px dashed var(--course-border);
+  padding:24px;
+  background:var(--course-soft);
+  color:var(--course-muted);
+  border-radius:12px;
+}
+.learning-resource-link {
+  color:var(--course-accent);
+  font-size:14px;
+  font-weight:800;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.learning-video{width:100%;max-height:380px;display:block;background:#080a10;border-radius:10px;margin-bottom:15px}
+.learning-finish {
+  border-top:1px solid var(--course-border);
+  margin-top:30px;
+  padding-top:24px;
+}
+.learning-finish>p{font-size:12px;color:var(--course-muted);line-height:1.6}
+.learning-finish .learning-feedback{color:var(--course-accent);font-weight:700}
+.learning-complete-label{
+  display:inline-block;
+  background:var(--course-soft);
+  color:var(--course-accent);
+  padding:11px 15px;
+  border-radius:10px;
+  font-weight:800;
+  font-size:14px;
+}
+.learning-open-btn{margin-top:18px;width:100%;font-weight:800;font-size:12px}
+.learning-no-lesson{color:var(--course-muted)}
+.app-shell[data-course-theme="black"] .learning-content .primary-btn {
+  background:#9bedbd;
+  color:#10251c;
+}
+@media(max-width:850px){
+  .learning-layout{grid-template-columns:1fr}
+  .learning-sidebar{position:static;max-height:none}
+}
+@media(max-width:550px){
+  .learning-main{padding:20px 0 50px}
+  .learning-header,.learning-content{padding:22px}
+  .learning-sidebar{padding:18px}
+}
