@@ -199,4 +199,47 @@ jobs:
 
           echo 'Smoke test OK: JWT, catalogo, dashboard, matricula idempotente, cancelamento e curso arquivado.'
 
+          # Aulas privadas e progresso — a matricula original permanece ACTIVE.
+          LESSONS_URL="http://localhost:8080/api/v1/students/me/courses/curso-teste-dashboard/lessons"
+          code=$(curl -sS -o /tmp/lessons-unauth.json -w '%{http_code}' "$LESSONS_URL")
+          [[ "$code" == "401" ]] || { echo "Aulas sem token: $code (esperado 401)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/lessons-owner.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" "$LESSONS_URL")
+          [[ "$code" == "200" ]] || { echo "Aulas aluno matriculado: $code"; cat /tmp/lessons-owner.json; exit 1; }
+          jq -e '.requiredLessons == 2 and .completedRequiredLessons == 1 and .progressPercent == 50 and
+                 (.modules | length) == 1 and (.modules[0].lessons | length) == 2' /tmp/lessons-owner.json >/dev/null
+
+          code=$(curl -sS -o /tmp/lessons-cancelled.json -w '%{http_code}' \
+            -H "Authorization: Bearer $SECOND_TOKEN" "$LESSONS_URL")
+          [[ "$code" == "404" ]] || { echo "Aulas de aluno cancelado: $code (esperado 404)"; exit 1; }
+
+          COMPLETE_URL="$LESSONS_URL/44444444-4444-4444-8444-444444444442/complete"
+          code=$(curl -sS -o /tmp/lesson-complete.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$COMPLETE_URL")
+          [[ "$code" == "200" ]] || { echo "Conclusao da aula: $code"; cat /tmp/lesson-complete.json; exit 1; }
+          jq -e '.newlyCompleted == true' /tmp/lesson-complete.json >/dev/null
+
+          code=$(curl -sS -o /tmp/lesson-repeat.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$COMPLETE_URL")
+          [[ "$code" == "200" ]] || { echo "Conclusao repetida: $code"; exit 1; }
+          jq -e '.newlyCompleted == false' /tmp/lesson-repeat.json >/dev/null
+
+          code=$(curl -sS -o /tmp/lessons-updated.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" "$LESSONS_URL")
+          [[ "$code" == "200" ]] || { echo "Aulas atualizadas: $code"; exit 1; }
+          jq -e '.requiredLessons == 2 and .completedRequiredLessons == 2 and .progressPercent == 100' /tmp/lessons-updated.json >/dev/null
+
+          code=$(curl -sS -o /tmp/lesson-denied.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $SECOND_TOKEN" "$COMPLETE_URL")
+          [[ "$code" == "404" ]] || { echo "Conclusao por aluno sem matricula ativa: $code (esperado 404)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/lesson-inexistent.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" \
+            "$LESSONS_URL/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/complete")
+          [[ "$code" == "404" ]] || { echo "Conclusao aula inexistente: $code (esperado 404)"; exit 1; }
+
+          echo 'Smoke test OK: aulas autenticadas, isoladas por matricula e conclusao idempotente.'
+
+
 
