@@ -290,6 +290,34 @@ jobs:
           jq -e '.status == "RASCUNHO"' /tmp/new-course.json >/dev/null
           OWN_COURSE_ID=$(jq -r '.id' /tmp/new-course.json)
 
+          # Capa PNG: upload apenas pelo dono, invisível enquanto RASCUNHO.
+          printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/BaAAAAAASUVORK5CYII=' | base64 -d > /tmp/curso-cover.png
+          code=$(curl -sS -o /tmp/cover-invalid.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -F 'file=@/tmp/ci-material.pdf;filename=capa.png;type=image/png' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/cover" || true)
+          [[ "$code" != "201" ]] || { echo "Capa com assinatura falsa foi aceita"; exit 1; }
+
+          code=$(curl -sS -o /tmp/cover-upload.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -F 'file=@/tmp/curso-cover.png;filename=java-basico.png;type=image/png' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/cover")
+          [[ "$code" == "201" ]] || { echo "Upload de capa: $code"; cat /tmp/cover-upload.json; exit 1; }
+          jq -e '.thumbnailUrl == "/api/v1/courses/curso-publicado-instrutor-ci/cover"' /tmp/cover-upload.json >/dev/null
+
+          code=$(curl -sS -o /tmp/cover-draft-public -w '%{http_code}' \
+            "http://localhost:8080/api/v1/courses/curso-publicado-instrutor-ci/cover")
+          [[ "$code" == "404" ]] || { echo "Capa de rascunho pública: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/cover-draft-private -w '%{http_code}' \
+            -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/cover")
+          [[ "$code" == "200" ]] || { echo "Capa do dono: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/cover-student-forbidden -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/cover")
+          [[ "$code" == "403" ]] || { echo "Aluno leu capa privada: $code"; exit 1; }
+
+
           # Não é possível publicar um curso sem aula obrigatória.
           code=$(curl -sS -o /tmp/publish-empty.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
@@ -349,6 +377,22 @@ jobs:
             "$INSTRUCTOR_URL/$OWN_COURSE_ID/publish")
           [[ "$code" == "200" ]] || { echo "Publicar curso: $code"; cat /tmp/published-course.json; exit 1; }
           jq -e '.status == "PUBLICADO"' /tmp/published-course.json >/dev/null
+
+          code=$(curl -sS -o /tmp/cover-published -w '%{http_code}' \
+            "http://localhost:8080/api/v1/courses/curso-publicado-instrutor-ci/cover")
+          [[ "$code" == "200" ]] || { echo "Capa pública publicada: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/cover-catalog.json -w '%{http_code}' \
+            "http://localhost:8080/api/v1/courses/curso-publicado-instrutor-ci")
+          [[ "$code" == "200" ]] || { echo "Detalhes com capa: $code"; exit 1; }
+          jq -e '.thumbnailUrl == "/api/v1/courses/curso-publicado-instrutor-ci/cover"' /tmp/cover-catalog.json >/dev/null
+
+          # Substituição de capa em curso publicado não altera aulas ou matrículas.
+          code=$(curl -sS -o /tmp/cover-replace.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -F 'file=@/tmp/curso-cover.png;filename=java-basico-atualizada.png;type=image/png' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/cover")
+          [[ "$code" == "201" ]] || { echo "Substituição da capa: $code"; exit 1; }
+
 
           code=$(curl -sS -o /tmp/readonly-module.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
@@ -444,7 +488,7 @@ jobs:
           echo 'Smoke test OK: anexos autenticados, liberação sequencial e vídeo completo 100%.'
 
   docker-parity-flyway-smoke:
-    name: Flyway V1 + V2 demo + V3 media
+    name: Flyway V1 + V2 demo + V3 media + V4 cover
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -509,13 +553,13 @@ jobs:
 
           applied=$(docker exec "$postgres_container" psql -X -U cursohub -d cursohub_demo_ci -tA \
             -c "SELECT string_agg(version, ',' ORDER BY installed_rank) FROM flyway_schema_history WHERE success=true")
-          [[ "$applied" == "1,2,3" ]] || {
-            echo "Migrações inesperadas. Obtidas: $applied; esperadas: 1,2,3"
+          [[ "$applied" == "1,2,3,4" ]] || {
+            echo "Migrações inesperadas. Obtidas: $applied; esperadas: 1,2,3,4"
             exit 1
           }
 
           tables=$(docker exec "$postgres_container" psql -X -U cursohub -d cursohub_demo_ci -tA \
-            -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('course_assets','video_playback_progress')")
-          [[ "$tables" == "2" ]] || { echo "Tabelas da V3 não foram encontradas"; exit 1; }
+            -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('course_assets','video_playback_progress','course_cover_images')")
+          [[ "$tables" == "3" ]] || { echo "Tabelas V3 e V4 não foram encontradas"; exit 1; }
 
-          echo "Flyway e catálogo demonstrativo OK: V1, V2 demo, V3 media."
+          echo "Flyway e catálogo demonstrativo OK: V1, V2 demo, V3 media, V4 capa."
