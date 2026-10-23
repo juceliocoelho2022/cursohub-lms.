@@ -10,6 +10,7 @@ export interface LearningLesson {
   durationSeconds: number
   required: boolean
   completed: boolean
+  locked: boolean
 }
 
 export interface LearningModule {
