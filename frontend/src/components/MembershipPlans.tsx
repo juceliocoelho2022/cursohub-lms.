@@ -1,8 +1,11 @@
 import {useEffect,useState} from 'react'
 import {loadMembershipPlans,money} from '../services/membership'
 import type {MembershipPlan} from '../services/membership'
+import {loadLoyalty} from '../services/loyalty'
+import type {LoyaltySummary} from '../services/loyalty'
 
-export function MembershipPlans({onExplore}:{onExplore:()=>void}){
+export function MembershipPlans({onExplore,token}:{onExplore:()=>void;token?:string}){
+  const [loyalty,setLoyalty]=useState<LoyaltySummary|null>(null)
   const [plans,setPlans]=useState<MembershipPlan[]>([])
   const [error,setError]=useState('')
   const [loading,setLoading]=useState(true)
@@ -15,6 +18,13 @@ export function MembershipPlans({onExplore}:{onExplore:()=>void}){
       .finally(()=>{if(!ctrl.signal.aborted)setLoading(false)})
     return ()=>ctrl.abort()
   },[])
+  useEffect(()=>{
+    if(!token){setLoyalty(null);return}
+    const controller=new AbortController()
+    void loadLoyalty(token,controller.signal).then(item=>{if(!controller.signal.aborted)setLoyalty(item)})
+      .catch(()=>{if(!controller.signal.aborted)setLoyalty(null)})
+    return ()=>controller.abort()
+  },[token])
   return <section className="membership-section" id="planos" aria-labelledby="membership-heading">
     <div className="container">
       <div className="section-topline"><span className="mini-rule"/> CLUBE CURSOHUB</div>
@@ -24,6 +34,17 @@ export function MembershipPlans({onExplore}:{onExplore:()=>void}){
           <p>Escolha o tempo de acesso mais adequado à sua jornada. Conheça os planos e os benefícios de cada duração.</p>
         </div>
         <button type="button" className="secondary-btn" onClick={onExplore}>Ver cursos disponíveis ↗</button>
+      </div>
+      <div className="loyalty-summary">
+        <div className="loyalty-copy">
+          <span className="membership-label">PROGRAMA DE FIDELIDADE GRATUITO</span>
+          <h3>{loyalty ? `Seu nível: ${loyalty.tier}` : 'Clube CursoHub — cada conquista conta'}</h3>
+          <p>{loyalty
+            ? `${loyalty.points} pontos · ${loyalty.completedCourses} curso(s) concluído(s). Próximo nível em ${loyalty.nextTierAt} cursos concluídos.`
+            : 'Bronze: início da jornada · Prata: 2 cursos concluídos · Ouro: 5 cursos concluídos.'}</p>
+          <small>Pontos por curso concluído: 100. Benefícios comerciais e resgates ainda não estão disponíveis.</small>
+        </div>
+        <span className="loyalty-emblem" aria-hidden="true">✦</span>
       </div>
       {loading&&<p className="membership-status" role="status">Carregando os planos...</p>}
       {error&&<p className="membership-status" role="alert">{error}</p>}
