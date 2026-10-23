@@ -489,7 +489,7 @@ jobs:
           echo 'Smoke test OK: anexos autenticados, liberação sequencial e vídeo completo 100%.'
 
   docker-parity-flyway-smoke:
-    name: Flyway V1 + V2 demo + V3 media + V4 cover
+    name: Flyway V1–V6 demo media cover prices plans
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -549,13 +549,26 @@ jobs:
           curl -fsS http://localhost:8080/api/v1/courses \
             | jq -e '.totalElements == 4' >/dev/null
 
+          # Planos: três ofertas informativas, sem endpoint que conceda acesso pago.
+          curl -fsS http://localhost:8080/api/v1/membership/plans \
+            | jq -e 'length == 3
+              and .[0].code == "MENSAL" and .[0].durationMonths == 1 and .[0].priceCents == 5990
+              and .[1].code == "SEMESTRAL" and .[1].durationMonths == 6 and .[1].priceCents == 26940
+              and .[2].code == "ANUAL" and .[2].durationMonths == 12 and .[2].priceCents == 47880
+              and .[0].courseLimit == 3 and .[1].courseLimit == 8 and .[2].courseLimit == null
+              and .[0].discountPercent == 5 and .[1].discountPercent == 10
+              and .[2].discountPercent == 15' >/dev/null
+          code=$(curl -sS -o /tmp/ci-membership-no-activation -w '%{http_code}' \
+            -X POST http://localhost:8080/api/v1/membership/plans/ANUAL/activate)
+          [[ "$code" == "401" ]] || { echo "Ativação anônima inesperada: $code"; exit 1; }
+
           postgres_container=$(docker ps --filter ancestor=postgres:17-alpine -q | head -1)
           [[ -n "$postgres_container" ]] || { echo "PostgreSQL de teste não encontrado"; exit 1; }
 
           applied=$(docker exec "$postgres_container" psql -X -U cursohub -d cursohub_demo_ci -tA \
             -c "SELECT string_agg(version, ',' ORDER BY installed_rank) FROM flyway_schema_history WHERE success=true")
-          [[ "$applied" == "1,2,3,4" ]] || {
-            echo "Migrações inesperadas. Obtidas: $applied; esperadas: 1,2,3,4"
+          [[ "$applied" == "1,2,3,4,5,6" ]] || {
+            echo "Migrações inesperadas. Obtidas: $applied; esperadas: 1,2,3,4,5,6"
             exit 1
           }
 
@@ -563,4 +576,4 @@ jobs:
             -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('course_assets','video_playback_progress','course_cover_images')")
           [[ "$tables" == "3" ]] || { echo "Tabelas V3 e V4 não foram encontradas"; exit 1; }
 
-          echo "Flyway e catálogo demonstrativo OK: V1, V2 demo, V3 media, V4 capa."
+          echo "Flyway e catálogo demonstrativo OK: V1–V6, incluindo preços e planos."
