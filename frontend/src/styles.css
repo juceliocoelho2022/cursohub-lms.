@@ -1284,3 +1284,7 @@ a.ch-social-network:focus-visible{outline:2px solid #9bedbd;outline-offset:-4px}
  .ch-footer-meta{gap:10px;justify-content:center}
 }
 @media(prefers-reduced-motion:reduce){.ch-social-network,.social-share-actions button{transition:none}}
+
+@media(min-width:611px){
+  .ch-social-network:last-child:nth-child(odd){grid-column:1 / -1;border-right:0}
+}
