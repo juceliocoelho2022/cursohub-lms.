@@ -56,6 +56,21 @@ public class ApiErrorHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(ex.getMessage()));
     }
 
+    @ExceptionHandler(br.com.cursohub.assets.application.AssetValidationException.class)
+    ResponseEntity<Map<String,Object>> handleAssetError(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    ResponseEntity<Map<String,Object>> handleInvalidVideoPosition(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body("Posição de vídeo inválida"));
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    ResponseEntity<Map<String,Object>> handleLargeUpload(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body("Limite de upload: 30 MB"));
+    }
+
     @ExceptionHandler({DuplicateEmailException.class})
     ResponseEntity<Map<String, Object>> handleDuplicate(DuplicateEmailException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body(ex.getMessage()));
