@@ -9,7 +9,11 @@ public record InstructorCourse(UUID id, String slug, String title, String descri
                                String category, CourseLevel level, CourseStatus status,
                                int estimatedMinutes, int priceCents) {
     public InstructorCourse(UUID id,String slug,String title,String description,
-                            String category,CourseLevel level,CourseStatus status,int estimatedMinutes) {
+                            String category,CourseLevel level,CourseStatus status,int estimatedMinutes, int priceCents) {
+    public InstructorCourse(UUID id, String slug, String title, String description, String category,
+                           CourseLevel level, CourseStatus status, int estimatedMinutes){
+        this(id,slug,title,description,category,level,status,estimatedMinutes,0);
+    }
         this(id,slug,title,description,category,level,status,estimatedMinutes,0);
     }
     public InstructorCourse {
