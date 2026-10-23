@@ -4,6 +4,87 @@ Plataforma **Learning Management System (LMS)** com **Clean Architecture + Arqui
 
 > **Status: Etapa 1 — Fundação + Catálogo público.** O projeto contém código-fonte de backend, frontend, schema SQL, dados demonstrativos, testes e documentação. Login, matrículas e aulas privadas ainda não estão implementados.
 
+## Arquitetura e modelagem relacional
+
+O CursoHub foi estruturado como **monólito modular**, adotando **Clean Architecture** e **Arquitetura Hexagonal (Ports & Adapters)**. A camada de aplicação conhece apenas interfaces (portas); detalhes como HTTP, Spring Data JPA e PostgreSQL ficam nos adaptadores.
+
+### Visão técnica do sistema
+
+```mermaid
+flowchart LR
+    Client["React + TypeScript"] --> HTTP["API REST / Spring Boot 4"]
+    HTTP --> Core["Casos de uso + domínio\nJava 21"]
+    Core --> Port["Portas de persistência"]
+    Adapter["Adaptadores JPA"] -. "implementam" .-> Port
+    Adapter --> DB[("PostgreSQL 17")]
+```
+
+### Modelo relacional resumido
+
+```mermaid
+erDiagram
+    app_users ||--o{ courses : "instrui"
+    app_users ||--o{ enrollments : "estuda"
+    courses ||--o{ course_modules : "possui"
+    course_modules ||--o{ lessons : "contem"
+    courses ||--o{ enrollments : "recebe"
+    enrollments ||--o{ lesson_progress : "registra"
+    lessons ||--o{ lesson_progress : "conclui"
+    enrollments ||--o| certificates : "origina"
+
+    app_users {
+      uuid id PK
+      varchar full_name
+      varchar email UK
+      varchar role
+    }
+    courses {
+      uuid id PK
+      uuid instructor_id FK
+      varchar slug UK
+      varchar title
+      varchar status
+    }
+    course_modules {
+      uuid id PK
+      uuid course_id FK
+      integer position
+    }
+    lessons {
+      uuid id PK
+      uuid module_id FK
+      varchar title
+      boolean is_required
+    }
+    enrollments {
+      uuid id PK
+      uuid student_id FK
+      uuid course_id FK
+      varchar status
+    }
+    lesson_progress {
+      uuid id PK
+      uuid enrollment_id FK
+      uuid lesson_id FK
+    }
+    certificates {
+      uuid id PK
+      uuid enrollment_id FK
+      uuid verification_code UK
+    }
+```
+
+O diagrama acima resume o domínio de aprendizagem. O **DER completo da V1 possui 12 tabelas**, incluindo avaliações, questões, alternativas, tentativas e respostas.
+
+**Documentação técnica:**
+- [DER completo, modelo lógico, dicionário e SQL](docs/MODELO_RELACIONAL.md)
+- [Arquitetura técnica, componentes, sequência e implantação](docs/ARQUITETURA_TECNICA.md)
+- [Clean Architecture e Hexagonal aplicadas ao projeto](docs/ARQUITETURA.md)
+- [Regras de negócio](docs/REGRAS_DE_NEGOCIO.md)
+- [DDL físico via Flyway](backend/src/main/resources/db/migration/V1__create_learning_platform.sql)
+
+> O banco contempla futuros módulos do LMS, mas a **Etapa 1 da aplicação** disponibiliza apenas o catálogo público. Cadastro/login estão sendo desenvolvidos em branch separada.
+
 ## Estrutura
 
 ```text
@@ -31,6 +112,8 @@ cursohub-lms/
 │   └── Dockerfile
 ├── docs/
 │   ├── ARQUITETURA.md
+│   ├── ARQUITETURA_TECNICA.md
+│   ├── MODELO_RELACIONAL.md
 │   ├── GUIA_PRATICO_VIDEO.md
 │   ├── REGRAS_DE_NEGOCIO.md
 │   └── ROADMAP.md
