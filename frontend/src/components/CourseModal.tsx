@@ -82,9 +82,14 @@ export function CourseModal({ course, session, theme, onThemeChange, onClose, on
         <div className="modal-theme-row">
           <CourseThemeSelector value={theme} onChange={onThemeChange} compact />
         </div>
-        <div className="modal-info">
-          <strong>Aprenda no seu ritmo</strong>
-          <p>Inscreva-se no curso para adicioná-lo ao seu painel. As aulas e a marcação de progresso serão disponibilizadas em uma próxima etapa.</p>
+        <div className="modal-info course-enrollment-guide">
+          <strong>Como começar a aprender</strong>
+          <ol>
+            <li>Confira a descrição, a duração e o nível deste curso.</li>
+            <li>{session ? 'Use sua conta de aluno para realizar a matrícula.' : 'Entre ou crie uma conta de aluno para continuar.'}</li>
+            <li>Após a matrícula gratuita, acesse o curso pelo seu painel.</li>
+          </ol>
+          {details.priceCents > 0 && <p>Para cursos pagos, a matrícula ficará disponível somente após a ativação do checkout.</p>}
         </div>
         <SocialShare title={details.title} slug={details.slug} compact/>
         {error && <p className="inline-error" role="alert">{error}</p>}
@@ -92,7 +97,7 @@ export function CourseModal({ course, session, theme, onThemeChange, onClose, on
         {details.priceCents>0 ? (
           <p className="modal-paid-notice">Este curso é pago. Estamos preparando a contratação segura; ainda não é possível comprá-lo nem realizar matrícula.</p>
         ) : !session ? (
-          <button type="button" className="primary-btn full" onClick={onRequestLogin}>Entre para se matricular ↗</button>
+          <button type="button" className="primary-btn full" onClick={onRequestLogin}>Entrar ou criar conta para matrícula ↗</button>
         ) : session.role === 'STUDENT' ? (
           <button type="button" className="primary-btn full" onClick={handleEnrollment} disabled={busy}>
             {busy ? 'Realizando matrícula...' : 'Matricular-se gratuitamente ↗'}
