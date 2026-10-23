@@ -241,10 +241,16 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                         </label>
                       </div>
                       {lesson.kind === 'TEXT'
-                        ? <label>Texto da aula
-                            <textarea required minLength={5} maxLength={100000} rows={5}
+                        ? <label>Texto da aula (Markdown)
+                            <textarea required minLength={5} maxLength={100000} rows={8}
+                                      placeholder="## Objetivo da aula — use **negrito**, listas e blocos de código com três crases."
                                       value={lesson.bodyText ?? ''}
                                       onChange={e => setLesson(v => ({ ...v, bodyText: e.target.value }))}/>
+                            <span className="instructor-markdown-hint">
+                              Dica: use # para título, ## para subtítulo, **texto** para negrito
+                              e três crases seguidas de java para destacar código.
+                              O aluno verá o conteúdo formatado.
+                            </span>
                           </label>
                         : <label>URL HTTPS do material
                             <input type="url" required placeholder="https://..."
