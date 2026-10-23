@@ -122,7 +122,7 @@ export function TechEditorial({onExplore,onPlans,onCategory,onSearch,children}:T
 
     <section className="ch-learning-tracks" aria-labelledby="ch-learning-heading">
       <div className="container">
-        <div className="ch-section-kicker"><span>01</span> / ÁREAS DO CONHECIMENTO</div>
+        <div className="ch-section-kicker"><span>02</span> / ÁREAS DO CONHECIMENTO</div>
         <div className="ch-tracks-title">
           <h2 id="ch-learning-heading">ESCOLHA SUA <em>PRÓXIMA FRONTEIRA.</em></h2>
           <p>Encontre seu caminho e comece pelo que faz sentido para você. As áreas abaixo levam diretamente ao catálogo de cursos.</p>
@@ -147,7 +147,7 @@ export function TechEditorial({onExplore,onPlans,onCategory,onSearch,children}:T
 
     <section className="ch-statement" aria-labelledby="ch-statement-heading">
       <div className="container ch-statement-layout">
-        <div className="ch-statement-index">02 / A EXPERIÊNCIA CURSOHUB</div>
+        <div className="ch-statement-index">03 / A EXPERIÊNCIA CURSOHUB</div>
         <h2 id="ch-statement-heading">AQUI, <em>APRENDER</em> VIRA <span>PRÁTICA.</span></h2>
         <div className="ch-statement-bottom">
           <p>Crie sua conta, escolha um curso, acompanhe suas aulas e evolua em cada etapa.
