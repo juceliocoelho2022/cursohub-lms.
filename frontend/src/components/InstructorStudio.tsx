@@ -18,7 +18,7 @@ interface Props {
 
 const emptyDraft: CourseDraftForm = {
   slug: '', title: '', description: '', category: 'Programação',
-  level: 'INICIANTE', estimatedMinutes: 180,
+  level: 'INICIANTE', estimatedMinutes: 180, priceCents: 0,
 }
 const emptyLesson: LessonForm = {
   title: '', kind: 'TEXT', contentUrl: null, bodyText: '',
@@ -199,6 +199,12 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                        onChange={e => setDraft(v => ({ ...v, estimatedMinutes: Number(e.target.value) }))}/>
               </label>
               <CourseCoverPicker file={draftCover} onSelect={setDraftCover}/>
+              <label>Preço de venda (R$)
+                <input type="number" min="0" max="20000" step="0.01" required
+                  value={(draft.priceCents / 100).toFixed(2)}
+                  onChange={e => setDraft(v => ({ ...v, priceCents: Math.round(Number(e.target.value)*100) }))}/>
+                <span className="pricing-field-hint">R$ 0,00 significa gratuito. Cursos pagos terão matrícula bloqueada até ativarmos o checkout.</span>
+              </label>
               <button className="primary-btn" disabled={busy} type="submit">Criar rascunho +</button>
             </form>
           </section>
@@ -216,6 +222,7 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                   <div>
                     <span className="instructor-kicker">EDITOR DE CURSO</span>
                     <h2>{content.course.title}</h2>
+                    <strong className="instructor-course-price">{content.course.priceCents === 0 ? 'Curso gratuito' : new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(content.course.priceCents/100)}</strong>
                     <p>{content.course.status === 'RASCUNHO'
                       ? 'Rascunho — apenas você tem acesso ao editor.'
                       : 'Publicado — conteúdo em modo somente leitura.'}</p>
