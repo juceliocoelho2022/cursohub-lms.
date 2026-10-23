@@ -46,6 +46,7 @@ export interface CourseDraftForm {
   category: string
   level: CourseLevel
   estimatedMinutes: number
+  priceCents: number
 }
 
 export interface LessonForm {
