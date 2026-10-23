@@ -1,0 +1,9 @@
+# Opcional: para acessar PostgreSQL a partir do Windows (psql, DBeaver,
+# backend Spring Boot fora do Docker). O compose.yaml principal não publica o banco.
+# Uso:
+#   docker compose -f compose.yaml -f compose.local-db-port.yaml up -d db
+# JDBC externo: jdbc:postgresql://localhost:5433/cursohub
+services:
+  db:
+    ports:
+      - "127.0.0.1:5433:5432"
