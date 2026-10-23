@@ -55,7 +55,7 @@ public class AssetPostgresAdapter implements CourseAssetStorePort {
     @Override
     @Transactional(readOnly=true)
     public List<CourseAsset> listEnrolled(UUID student,String slug) {
-        return jdbc.query("SELECT "+COLS+"""
+        return jdbc.query("SELECT "+COLS+" "+"""
             FROM course_assets a
             JOIN courses c ON c.id=a.course_id
             JOIN enrollments e ON e.course_id=c.id
