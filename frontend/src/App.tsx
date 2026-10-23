@@ -1,0 +1,162 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { CourseCard } from './components/CourseCard'
+import { CourseModal } from './components/CourseModal'
+import type { CatalogPage, Course } from './services/catalog'
+import { loadCourses } from './services/catalog'
+import './styles.css'
+
+const categories = ['Programação', 'Dados', 'Matemática']
+const PAGE_SIZE = 6
+
+export default function App() {
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [category, setCategory] = useState('')
+  const [level, setLevel] = useState('')
+  const [page, setPage] = useState(0)
+  const [catalog, setCatalog] = useState<CatalogPage | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [retry, setRetry] = useState(0)
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
+  const coursesSection = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => setDebouncedSearch(search.trim()), 300)
+    return () => window.clearTimeout(handle)
+  }, [search])
+
+  useEffect(() => setPage(0), [debouncedSearch, category, level])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setLoading(true)
+    setError('')
+    loadCourses({ search: debouncedSearch, category, level, page, size: PAGE_SIZE }, controller.signal)
+      .then(setCatalog)
+      .catch(err => {
+        if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Erro inesperado')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false)
+      })
+    return () => controller.abort()
+  }, [debouncedSearch, category, level, page, retry])
+
+  const scrollToCourses = useCallback(() => coursesSection.current?.scrollIntoView({ behavior: 'smooth' }), [])
+  const closeModal = useCallback(() => setSelectedCourse(null), [])
+  const resetFilters = () => { setSearch(''); setCategory(''); setLevel(''); setPage(0) }
+
+  return (
+    <div className="app-shell">
+      <header className="site-header">
+        <div className="container nav-row">
+          <a className="brand" href="#inicio" aria-label="CursoHub — início">
+            <span className="brand-icon" aria-hidden="true">✳</span> Curso<span>Hub</span><b>.</b>
+          </a>
+          <nav aria-label="Navegação principal">
+            <a href="#cursos">Explorar cursos</a>
+            <a href="#sobre">Sobre a plataforma</a>
+          </nav>
+          <button className="nav-cta" type="button" onClick={scrollToCourses}>Começar a explorar <span>↗</span></button>
+        </div>
+      </header>
+
+      <main id="inicio">
+        <section className="hero">
+          <div className="container hero-grid">
+            <div className="hero-copy">
+              <div className="eyebrow"><span className="eyebrow-dot" /> APRENDA NO SEU RITMO</div>
+              <h1>Conhecimento que <em>transforma</em> seu próximo passo.</h1>
+              <p>Explore cursos de tecnologia, dados e matemática em uma experiência de aprendizagem feita para evoluir com você.</p>
+              <div className="hero-actions">
+                <button className="primary-btn" type="button" onClick={scrollToCourses}>Explorar cursos <span>↗</span></button>
+                <span className="hero-note">Novas possibilidades começam aqui</span>
+              </div>
+              <div className="hero-proof">
+                <div className="proof-avatars" aria-hidden="true"><span>J</span><span>P</span><span>Σ</span></div>
+                <span><b>Aprendizagem prática</b> de um jeito acessível</span>
+              </div>
+            </div>
+            <div className="hero-art" aria-hidden="true">
+              <div className="art-halo art-halo-1" />
+              <div className="art-halo art-halo-2" />
+              <div className="art-top-chip">✦&nbsp; Sua jornada de aprendizado</div>
+              <div className="art-main-card">
+                <span className="art-card-kicker">CURSOHUB / LEARNING</span>
+                <div className="art-code-icon">{`{ }`}</div>
+                <div className="art-card-line" />
+                <div className="art-card-line short" />
+                <div className="art-bottom-text">LEARN · BUILD · GROW</div>
+              </div>
+              <div className="art-badge"><span>↗</span><strong>Vá além</strong><small>Um curso de cada vez</small></div>
+              <div className="art-sparkle">✳</div>
+            </div>
+          </div>
+        </section>
+
+        <section className="catalog-section" id="cursos" ref={coursesSection}>
+          <div className="container">
+            <div className="section-topline"><span className="mini-rule" /> CATÁLOGO DE CURSOS</div>
+            <div className="section-header">
+              <div><h2>Seu próximo <em>grande passo</em> começa aqui.</h2>
+                <p>Encontre conteúdos alinhados com seus objetivos e interesses.</p>
+              </div>
+              <span className="course-total">{catalog ? `${catalog.totalElements} curso${catalog.totalElements === 1 ? '' : 's'} disponível${catalog.totalElements === 1 ? '' : 'eis'}` : 'Carregando catálogo...'}</span>
+            </div>
+
+            <div className="filters">
+              <label className="search-field">
+                <span className="search-icon" aria-hidden="true">⌕</span>
+                <span className="sr-only">Pesquisar cursos</span>
+                <input value={search} onChange={event => setSearch(event.target.value)}
+                       placeholder="Qual conhecimento você procura?" maxLength={120} />
+              </label>
+              <label className="filter-select">
+                <span className="sr-only">Categoria</span>
+                <select value={category} onChange={event => setCategory(event.target.value)}>
+                  <option value="">Todas as categorias</option>
+                  {categories.map(item => <option key={item} value={item}>{item}</option>)}
+                </select>
+              </label>
+              <label className="filter-select level-select">
+                <span className="sr-only">Nível</span>
+                <select value={level} onChange={event => setLevel(event.target.value)}>
+                  <option value="">Todos os níveis</option>
+                  <option value="INICIANTE">Iniciante</option>
+                  <option value="INTERMEDIARIO">Intermediário</option>
+                  <option value="AVANCADO">Avançado</option>
+                </select>
+              </label>
+            </div>
+
+            {error ? (
+              <div className="state-box" role="alert"><div className="state-icon">!</div><h3>Não conseguimos carregar os cursos</h3><p>{error} Confirme se a API está executando.</p><button className="secondary-btn" onClick={() => setRetry(n => n + 1)}>Tentar novamente</button></div>
+            ) : loading ? (
+              <div className="state-box" role="status"><div className="spinner" /><p>Buscando os melhores caminhos de aprendizagem...</p></div>
+            ) : !catalog || catalog.content.length === 0 ? (
+              <div className="state-box"><div className="state-icon">⌕</div><h3>Nenhum curso encontrado</h3><p>Tente ajustar sua busca ou limpar os filtros.</p><button className="secondary-btn" onClick={resetFilters}>Limpar filtros</button></div>
+            ) : (
+              <>
+                <div className="course-grid">
+                  {catalog.content.map(course => <CourseCard key={course.id} course={course} onView={setSelectedCourse} />)}
+                </div>
+                {catalog.totalPages > 1 && <div className="pagination">
+                  <button className="secondary-btn" disabled={page === 0} onClick={() => setPage(p => p - 1)}>← Anterior</button>
+                  <span>Página {page + 1} de {catalog.totalPages}</span>
+                  <button className="secondary-btn" disabled={page + 1 >= catalog.totalPages} onClick={() => setPage(p => p + 1)}>Próxima →</button>
+                </div>}
+              </>
+            )}
+          </div>
+        </section>
+
+        <section className="about-section" id="sobre">
+          <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>O CursoHub começa com um catálogo conectado à API e ao banco de dados. Nas próximas versões, teremos matrículas, aulas, avaliações, acompanhamento de progresso e certificados.</p></div>
+        </section>
+      </main>
+      <footer><div className="container footer-row"><span className="brand">✳ Curso<span>Hub</span><b>.</b></span><span>© {new Date().getFullYear()} CursoHub · Versão inicial de desenvolvimento</span></div></footer>
+      {selectedCourse && <CourseModal course={selectedCourse} onClose={closeModal} />}
+    </div>
+  )
+}
