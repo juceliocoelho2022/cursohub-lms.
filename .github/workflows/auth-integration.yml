@@ -452,9 +452,12 @@ jobs:
             -H "Authorization: Bearer $TOKEN" "$LEGACY_COURSE/certificate")
           [[ "$code" == "200" ]] || { echo "Curso sem certificado: $code"; exit 1; }
           jq -e 'type == "null"' /tmp/legacy-certificate.json >/dev/null
-          code=$(curl -sS -o /tmp/legacy-cert-early.json -w '%{http_code}' \
+          # O curso legado concluiu suas duas aulas obrigatórias nos testes anteriores:
+          # Sem avaliação obrigatória, pode emitir certificado normalmente.
+          code=$(curl -sS -o /tmp/legacy-cert-issued.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $TOKEN" "$LEGACY_COURSE/certificate")
-          [[ "$code" == "409" ]] || { echo "Certificado de curso incompleto: $code"; exit 1; }
+          [[ "$code" == "200" ]] || { echo "Certificado de curso sem avaliação: $code"; cat /tmp/legacy-cert-issued.json; exit 1; }
+          jq -e '(.verificationCode|length)==36' /tmp/legacy-cert-issued.json >/dev/null
 
           # Etapa 8 — avaliação e emissão de certificados sem expor gabarito.
           code=$(curl -sS -o /tmp/quiz-course.json -w '%{http_code}' \
