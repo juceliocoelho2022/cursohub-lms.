@@ -71,8 +71,10 @@ public final class InstructorStudioService implements InstructorStudioUseCase {
                 throw new InvalidInstructorContentException("Conteúdo da aula é muito longo");
             url = null;
         } else {
-            if (url == null || url.length() > 1000 || !validHttps(url))
-                throw new InvalidInstructorContentException("Materiais de vídeo e PDF exigem URL HTTPS válida");
+            if ((command.kind() == LessonKind.PDF && url == null) ||
+                    (url != null && (url.length() > 1000 || !validHttps(url))))
+                throw new InvalidInstructorContentException("Materiais externos exigem URL HTTPS válida");
+            // VIDEO sem URL aguarda upload seguro de MP4/WEBM no próprio curso.
             bodyText = null;
         }
         return store.appendLesson(instructorId, courseId, moduleId,
