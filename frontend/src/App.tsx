@@ -219,11 +219,22 @@ export default function App() {
         </section>
 
         <section className="about-section" id="sobre">
-          <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>O CursoHub começa com um catálogo conectado à API e ao banco de dados. Nas próximas versões, teremos matrículas, aulas, avaliações, acompanhamento de progresso e certificados.</p></div>
+          <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>O CursoHub conecta catálogo, autenticação e matrículas ao banco de dados. Aulas, avaliações e certificados serão disponibilizados nas próximas etapas.</p></div>
         </section>
       </main>}
       <footer><div className="container footer-row"><span className="brand">✳ Curso<span>Hub</span><b>.</b></span><span>© {new Date().getFullYear()} CursoHub · Versão inicial de desenvolvimento</span></div></footer>
-      {selectedCourse && <CourseModal course={selectedCourse} onClose={closeModal} />}
+      {selectedCourse && <CourseModal
+        key={selectedCourse.slug}
+        course={selectedCourse}
+        session={session}
+        onClose={closeModal}
+        onRequestLogin={() => { setSelectedCourse(null); setAuthMode('login') }}
+        onEnrolled={() => {
+          setSelectedCourse(null)
+          setView('dashboard')
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }}
+      />}
       {authMode && <AuthDialog initialMode={authMode} onClose={closeAuth} onAuthenticated={onAuthenticated} />}
     </div>
   )
