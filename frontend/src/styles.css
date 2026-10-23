@@ -526,3 +526,124 @@
 .instructor-outline-lesson>small{margin-left:auto;color:var(--course-muted)}
 @media(max-width:940px){.instructor-grid{grid-template-columns:1fr}}
 @media(max-width:550px){.instructor-main{padding:35px 0 65px}.instructor-panel,.instructor-editor{padding:18px}.instructor-input-row{grid-template-columns:1fr}.instructor-inline-form{flex-direction:column;align-items:stretch}}
+
+
+/* Etapa 6 UX — Markdown didático, tipografia e blocos de código */
+.learning-reading:has(.learning-markdown) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+}
+
+.learning-markdown {
+  color: var(--course-text);
+  font-size: 15px;
+  line-height: 1.85;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.learning-markdown > :first-child { margin-top: 0; }
+.learning-markdown > :last-child { margin-bottom: 0; }
+.learning-markdown h1,
+.learning-markdown h2,
+.learning-markdown h3,
+.learning-markdown h4 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  color: var(--course-text);
+  letter-spacing: -.45px;
+  line-height: 1.35;
+  margin: 1.5em 0 .6em;
+}
+.learning-markdown h1 { font-size: clamp(22px, 2.6vw, 28px); }
+.learning-markdown h2 { font-size: 21px; }
+.learning-markdown h3 { font-size: 17px; }
+.learning-markdown h4 { font-size: 15px; }
+.learning-markdown p { margin: .75em 0 1.15em; }
+.learning-markdown strong { font-weight: 800; color: var(--course-text); }
+.learning-markdown em { font-style: italic; }
+.learning-markdown ul,
+.learning-markdown ol { margin: .7em 0 1.3em; padding-left: 1.8em; }
+.learning-markdown li { padding-left: 3px; margin: .25em 0; }
+.learning-markdown li::marker { color: var(--course-accent); }
+.learning-markdown li p { margin: .25em 0; }
+.learning-markdown a {
+  color: var(--course-accent);
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.learning-markdown a:focus-visible { outline: 2px solid var(--course-accent); outline-offset: 3px; }
+.learning-markdown blockquote {
+  margin: 1.2em 0;
+  padding: 12px 20px;
+  background: var(--course-card);
+  border-left: 4px solid var(--course-accent);
+  border-radius: 0 9px 9px 0;
+  color: var(--course-text);
+}
+.learning-markdown blockquote p { margin: 0; }
+.learning-markdown hr { border: 0; border-top: 1px solid var(--course-border); margin: 25px 0; }
+.learning-markdown pre {
+  background: #121b29;
+  color: #e7edf5;
+  border-radius: 12px;
+  padding: 20px;
+  overflow-x: auto;
+  margin: 1.2em 0;
+  border: 1px solid #344358;
+  white-space: pre;
+  tab-size: 4;
+  text-align: left;
+}
+.learning-markdown pre code {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0;
+  font: 13px/1.7 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.learning-markdown :not(pre) > code {
+  background: var(--course-card);
+  border: 1px solid var(--course-border);
+  color: var(--course-accent);
+  padding: 2px 5px;
+  border-radius: 5px;
+  font: .9em/1.55 Consolas, monospace;
+}
+.learning-markdown .hljs-keyword,
+.learning-markdown .hljs-selector-tag,
+.learning-markdown .hljs-built_in,
+.learning-markdown .hljs-type { color: #8dd9ff; }
+.learning-markdown .hljs-string,
+.learning-markdown .hljs-regexp,
+.learning-markdown .hljs-addition { color: #a7e69f; }
+.learning-markdown .hljs-number,
+.learning-markdown .hljs-literal,
+.learning-markdown .hljs-symbol { color: #ffcd9e; }
+.learning-markdown .hljs-comment,
+.learning-markdown .hljs-quote { color: #91a1b4; font-style: italic; }
+.learning-markdown .hljs-title,
+.learning-markdown .hljs-title.class_,
+.learning-markdown .hljs-title.function_ { color: #ffdd89; }
+.learning-markdown .hljs-meta,
+.learning-markdown .hljs-attr,
+.learning-markdown .hljs-attribute { color: #d5b6ff; }
+.learning-markdown table {
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  margin: 1.2em 0;
+  font-size: 13px;
+}
+.learning-markdown th,
+.learning-markdown td { border: 1px solid var(--course-border); padding: 10px 12px; text-align: left; }
+.learning-markdown th { background: var(--course-card); color: var(--course-text); font-weight: 800; }
+.learning-markdown input[type="checkbox"] { accent-color: var(--course-accent); }
+@media (max-width: 600px) {
+  .learning-reading { padding: 16px; }
+  .learning-markdown pre { padding: 13px; }
+  .learning-markdown pre code { font-size: 12px; }
+}
