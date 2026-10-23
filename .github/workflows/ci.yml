@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main, feature/course-cover-upload, feature/course-pricing-loyalty, feature/home-premium-redesign]
+    branches: [main, feature/course-cover-upload, feature/course-pricing-loyalty, feature/home-premium-redesign, feature/home-fiap-inspired]
 
 permissions:
   contents: read
