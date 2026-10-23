@@ -38,10 +38,15 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
     getCourseLessons(slug, token, controller.signal)
       .then(data => {
         setCourse(data)
-        setActiveId(id =>
-          id && data.modules.some(module => module.lessons.some(lesson => lesson.id === id))
-            ? id : data.modules.flatMap(module => module.lessons)[0]?.id ?? null
-        )
+        setActiveId(id => {
+          const lessons = data.modules.flatMap(module => module.lessons)
+          // Preserva uma seleção válida somente se ela continuar desbloqueada.
+          if (id && lessons.some(lesson => lesson.id === id && !lesson.locked)) return id
+          // Na primeira abertura, retoma a próxima aula pendente e acessível.
+          return lessons.find(lesson => !lesson.completed && !lesson.locked)?.id
+            ?? lessons.find(lesson => !lesson.locked)?.id
+            ?? null
+        })
       })
       .catch(err => { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Erro inesperado') })
       .finally(() => { if (!controller.signal.aborted) setLoading(false) })
