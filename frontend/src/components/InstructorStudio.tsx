@@ -261,9 +261,10 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                                      onChange={e => setLesson(v => ({ ...v, contentUrl: e.target.value }))}/>
                             </label>}
                       <label className="instructor-checkbox">
-                        <input type="checkbox" checked={lesson.required}
+                        <input type="checkbox" checked={lesson.kind === 'VIDEO' || lesson.required}
+                               disabled={lesson.kind === 'VIDEO'}
                                onChange={e => setLesson(v => ({ ...v, required: e.target.checked }))}/>
-                        Aula obrigatória para progresso
+                        {lesson.kind === 'VIDEO' ? 'Vídeos são sempre obrigatórios para avançar' : 'Aula obrigatória para progresso'}
                       </label>
                       <button className="primary-btn" disabled={busy} type="submit">Salvar aula +</button>
                     </form>}
