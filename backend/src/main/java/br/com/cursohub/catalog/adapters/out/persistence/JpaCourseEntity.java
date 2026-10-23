@@ -38,8 +38,6 @@ public class JpaCourseEntity {
     private int estimatedMinutes;
     @Column(name = "thumbnail_url", length = 500)
     private String thumbnailUrl;
-    @Column(name = "price_cents",nullable=false)
-    private int priceCents;
     @Column(name = "price_cents", nullable = false)
     private int priceCents;
     @Column(name = "published_at")
@@ -51,6 +49,6 @@ public class JpaCourseEntity {
 
     public Course toDomain() {
         return new Course(id, slug, title, description, category, level, status,
-                instructorId, estimatedMinutes, thumbnailUrl, priceCents, publishedAt);
+                instructorId, estimatedMinutes, thumbnailUrl, publishedAt, priceCents);
     }
 }
