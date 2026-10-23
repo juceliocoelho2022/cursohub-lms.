@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CourseCard } from './components/CourseCard'
 import { CourseModal } from './components/CourseModal'
 import { AuthDialog } from './components/AuthDialog'
+import { StudentDashboard } from './components/StudentDashboard'
 import type { AuthMode } from './components/AuthDialog'
 import { currentUser } from './services/auth'
 import type { AuthSession, CurrentUser } from './services/auth'
@@ -27,6 +28,8 @@ export default function App() {
   const [authMode, setAuthMode] = useState<AuthMode | null>(null)
   const [session, setSession] = useState<AuthSession | null>(null)
   const [currentProfile, setCurrentProfile] = useState<CurrentUser | null>(null)
+  const [view, setView] = useState<'catalog' | 'dashboard'>('catalog')
+  const [scrollTarget, setScrollTarget] = useState<'courses' | 'about' | null>(null)
 
   useEffect(() => {
     const handle = window.setTimeout(() => setDebouncedSearch(search.trim()), 300)
@@ -50,15 +53,30 @@ export default function App() {
     return () => controller.abort()
   }, [debouncedSearch, category, level, page, retry])
 
-  const scrollToCourses = useCallback(() => coursesSection.current?.scrollIntoView({ behavior: 'smooth' }), [])
+  const scrollToCourses = useCallback(() => {
+    setView('catalog')
+    setScrollTarget('courses')
+  }, [])
+  const scrollToAbout = useCallback(() => {
+    setView('catalog')
+    setScrollTarget('about')
+  }, [])
+  useEffect(() => {
+    if (view !== 'catalog' || !scrollTarget) return
+    const destination = scrollTarget === 'courses' ? coursesSection.current : document.getElementById('sobre')
+    destination?.scrollIntoView({ behavior: 'smooth' })
+    setScrollTarget(null)
+  }, [view, scrollTarget])
   const closeModal = useCallback(() => setSelectedCourse(null), [])
   const resetFilters = () => { setSearch(''); setCategory(''); setLevel(''); setPage(0) }
   const closeAuth = useCallback(() => setAuthMode(null), [])
   const onAuthenticated = useCallback((authenticated: AuthSession) => {
     setSession(authenticated)
     setAuthMode(null)
+    if (authenticated.role === 'STUDENT') setView('dashboard')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
-  const logout = useCallback(() => { setSession(null); setCurrentProfile(null) }, [])
+  const logout = useCallback(() => { setSession(null); setCurrentProfile(null); setView('catalog') }, [])
 
   useEffect(() => {
     if (!session) { setCurrentProfile(null); return }
@@ -76,17 +94,22 @@ export default function App() {
     <div className="app-shell">
       <header className="site-header">
         <div className="container nav-row">
-          <a className="brand" href="#inicio" aria-label="CursoHub — início">
+          <a className="brand" href="#inicio" aria-label="CursoHub — início" onClick={() => setView("catalog")}>
             <span className="brand-icon" aria-hidden="true">✳</span> Curso<span>Hub</span><b>.</b>
           </a>
           <nav aria-label="Navegação principal">
-            <a href="#cursos">Explorar cursos</a>
-            <a href="#sobre">Sobre a plataforma</a>
+            <a href="#cursos" onClick={event => { event.preventDefault(); scrollToCourses() }}>Explorar cursos</a>
+            <a href="#sobre" onClick={event => { event.preventDefault(); scrollToAbout() }}>Sobre a plataforma</a>
           </nav>
           <div className="nav-account">
             {session ? (
               <>
                 <span className="account-greeting">Olá, {(currentProfile?.name || session.name).split(' ')[0]}!</span>
+                {session.role === 'STUDENT' && (
+                  <button className="nav-cta" type="button" onClick={() => { setView('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+                    Meu painel
+                  </button>
+                )}
                 <button className="nav-cta" type="button" onClick={logout}>Sair</button>
               </>
             ) : (
@@ -99,7 +122,14 @@ export default function App() {
         </div>
       </header>
 
-      <main id="inicio">
+      {view === 'dashboard' && session?.role === 'STUDENT'
+        ? <StudentDashboard
+            token={session.accessToken}
+            name={currentProfile?.name || session.name}
+            onExplore={scrollToCourses}
+            onLogout={logout}
+          />
+        : <main id="inicio">
         <section className="hero">
           <div className="container hero-grid">
             <div className="hero-copy">
@@ -191,7 +221,7 @@ export default function App() {
         <section className="about-section" id="sobre">
           <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>O CursoHub começa com um catálogo conectado à API e ao banco de dados. Nas próximas versões, teremos matrículas, aulas, avaliações, acompanhamento de progresso e certificados.</p></div>
         </section>
-      </main>
+      </main>}
       <footer><div className="container footer-row"><span className="brand">✳ Curso<span>Hub</span><b>.</b></span><span>© {new Date().getFullYear()} CursoHub · Versão inicial de desenvolvimento</span></div></footer>
       {selectedCourse && <CourseModal course={selectedCourse} onClose={closeModal} />}
       {authMode && <AuthDialog initialMode={authMode} onClose={closeAuth} onAuthenticated={onAuthenticated} />}
