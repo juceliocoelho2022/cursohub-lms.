@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react'
+import {useEffect,useRef,useState} from 'react'
 import {CourseCoverPicker} from './CourseCoverPicker'
 import {fetchOwnedCover,uploadCourseCover} from '../services/courseCover'
 
@@ -9,22 +9,28 @@ export function CourseCoverEditor({token,courseId}:Props) {
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
   const [error,setError]=useState('')
+  const currentUrl=useRef('')
 
   async function load(signal?:AbortSignal){
     const blob=await fetchOwnedCover(token,courseId,signal)
     if(signal?.aborted) return null
     if(!blob){setCurrent('');return null}
     const url=URL.createObjectURL(blob)
+    if(currentUrl.current)URL.revokeObjectURL(currentUrl.current)
+    currentUrl.current=url
     setCurrent(url)
     return url
   }
   useEffect(()=>{
     const controller=new AbortController()
-    let objectUrl=''
     setFile(null);setMessage('');setError('');setCurrent('')
-    void load(controller.signal).then(url=>{objectUrl=url??''})
+    void load(controller.signal)
       .catch(err=>{if(!controller.signal.aborted)setError(err instanceof Error?err.message:'Falha ao carregar a imagem')})
-    return ()=>{controller.abort();if(objectUrl)URL.revokeObjectURL(objectUrl)}
+    return ()=>{
+      controller.abort()
+      if(currentUrl.current)URL.revokeObjectURL(currentUrl.current)
+      currentUrl.current=''
+    }
   },[token,courseId])
 
   async function upload(){
@@ -35,7 +41,9 @@ export function CourseCoverEditor({token,courseId}:Props) {
       const blob=await fetchOwnedCover(token,courseId)
       if(blob){
         const url=URL.createObjectURL(blob)
-        setCurrent(prev=>{if(prev)URL.revokeObjectURL(prev);return url})
+        if(currentUrl.current)URL.revokeObjectURL(currentUrl.current)
+        currentUrl.current=url
+        setCurrent(url)
       }
       setFile(null)
       setMessage('Capa salva no curso. Se ele já estiver publicado, a imagem estará disponível no catálogo.')
