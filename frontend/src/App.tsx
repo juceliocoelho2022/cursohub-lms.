@@ -205,7 +205,7 @@ export default function App() {
           onCategory={value=>{setCategory(value);setLevel('');setSearch('');scrollToCourses()}}>
         <section className="catalog-section" id="cursos" ref={coursesSection}>
           <div className="container">
-            <div className="section-topline"><span className="mini-rule" /> 03 / NOSSOS CURSOS</div>
+            <div className="section-topline"><span className="mini-rule" /> 01 / NOSSOS CURSOS</div>
             <div className="section-header">
               <div><h2>ESTUDE O QUE <em>MOVE O FUTURO.</em></h2>
                 <p>Explore nossos cursos, filtre por área e comece pelo conhecimento que você quer desenvolver.</p>
