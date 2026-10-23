@@ -36,7 +36,7 @@ public class VideoWatchPostgresAdapter {
               AND NOT EXISTS (
                 SELECT 1 FROM lessons prior JOIN course_modules pm ON pm.id=prior.module_id
                 LEFT JOIN lesson_progress lp ON lp.lesson_id=prior.id AND lp.enrollment_id=e.id
-                WHERE pm.course_id=c.id AND prior.is_required=TRUE AND lp.id IS NULL
+                WHERE pm.course_id=c.id AND (prior.is_required=TRUE OR prior.kind='VIDEO') AND lp.id IS NULL
                 AND (pm.position<m.position OR (pm.position=m.position AND prior.position<l.position))
               )
             FOR UPDATE OF e
