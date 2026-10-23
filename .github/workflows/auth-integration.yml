@@ -43,7 +43,10 @@ jobs:
           cache: maven
       - name: Gerar chave JWT temporaria para CI
         shell: bash
-        run: echo "JWT_SECRET_BASE64=$(openssl rand -base64 32 | tr -d '\n')" >> "$GITHUB_ENV"
+        run: |
+          key=$(openssl rand -base64 32 | tr -d '\n')
+          echo "::add-mask::$key"
+          echo "JWT_SECRET_BASE64=$key" >> "$GITHUB_ENV"
       - name: Smoke test PostgreSQL + JWT
         shell: bash
         working-directory: backend
