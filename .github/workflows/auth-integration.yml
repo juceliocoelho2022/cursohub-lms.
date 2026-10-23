@@ -442,6 +442,20 @@ jobs:
             "http://localhost:8080/api/v1/students/me/courses/curso-publicado-instrutor-ci/assets/$PDF_ASSET_ID")
           [[ "$code" == "401" ]] || { echo "PDF sem JWT: $code"; exit 1; }
           echo 'Smoke test OK: anexos autenticados, liberação sequencial e vídeo completo 100%.'
+          # Retrocompatibilidade: curso antigo sem avaliação nem certificado.
+          LEGACY_COURSE="http://localhost:8080/api/v1/students/me/courses/curso-teste-dashboard"
+          code=$(curl -sS -o /tmp/legacy-quiz.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" "$LEGACY_COURSE/assessment")
+          [[ "$code" == "200" ]] || { echo "Curso sem avaliação: $code"; exit 1; }
+          jq -e 'type == "null"' /tmp/legacy-quiz.json >/dev/null
+          code=$(curl -sS -o /tmp/legacy-certificate.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" "$LEGACY_COURSE/certificate")
+          [[ "$code" == "200" ]] || { echo "Curso sem certificado: $code"; exit 1; }
+          jq -e 'type == "null"' /tmp/legacy-certificate.json >/dev/null
+          code=$(curl -sS -o /tmp/legacy-cert-early.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$LEGACY_COURSE/certificate")
+          [[ "$code" == "409" ]] || { echo "Certificado de curso incompleto: $code"; exit 1; }
+
           # Etapa 8 — avaliação e emissão de certificados sem expor gabarito.
           code=$(curl -sS -o /tmp/quiz-course.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
