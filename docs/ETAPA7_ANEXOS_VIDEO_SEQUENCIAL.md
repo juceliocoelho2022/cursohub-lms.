@@ -28,7 +28,7 @@ No painel, acesse o curso matriculado:
 - Usuário estudante: endpoints `/api/v1/students/me/courses/{slug}/assets/**` (perfil `STUDENT`), limitados a matrícula `ACTIVE`/`COMPLETED`.
 - Download de vídeo de aula bloqueada também é impedido no backend.
 - Os downloads exigem `Authorization: Bearer`, sem token na URL ou no `localStorage`.
-- Os arquivos ficam na coluna `BYTEA` de `course_assets` da migração Flyway V2. Essa estratégia é adequada **somente para pequenos arquivos em ambiente MVP**. Arquivos maiores e produção exigem armazenamento de objetos (S3/MinIO), antivírus, cota e URLs temporárias.
+- Os arquivos ficam na coluna `BYTEA` de `course_assets` da migração Flyway V3. Essa estratégia é adequada **somente para pequenos arquivos em ambiente MVP**. Arquivos maiores e produção exigem armazenamento de objetos (S3/MinIO), antivírus, cota e URLs temporárias.
 - A assinatura inicial do arquivo é conferida (não apenas a extensão). Os arquivos jamais são extraídos ou executados pelo backend; são enviados como **attachment**, com `nosniff`.
 - Não execute `docker compose down -v`. O volume `cursohub_pgdata` mantém os dados.
 - A substituição de videoaula precisa preservar histórico; em produção deve usar versionamento e migração de progresso.
@@ -62,3 +62,25 @@ Se já existir a branch local, use `git switch feature/course-assets-video-gatin
 Teste primeiro um PDF e uma imagem pequenos; confirme download como estudante matriculado. Em um curso de teste em **RASCUNHO**, crie 3 aulas obrigatórias: TEXT, VIDEO (duração real) e TEXT. Anexe o vídeo, publique, matricule aluno e confira que a terceira aula permanece bloqueada até conclusão da primeira e 100% do vídeo.
 
 Para evitar grandes arquivos no PostgreSQL, respeite **30 MiB por arquivo** e não faça uploads de vídeos grandes nesta versão.
+
+## Compatibilidade com o catálogo demonstrativo existente
+
+O ambiente `compose.yaml` utiliza `FLYWAY_LOCATIONS=classpath:db/migration,classpath:db/demo`. O catálogo demonstrativo ocupa **V2** (`db/demo/V2__demo_catalog.sql`); o upload de materiais utiliza **V3** (`db/migration/V3__course_assets_video_progress.sql`). Mantenha ambas as versões: não renomeie nem remova a V2 já aplicada, e não execute `flyway repair` ou apague o volume para resolver conflitos de versão.
+
+Em um banco já existente, o resultado após iniciar deve ser:
+
+```text
+V1 create learning platform  success
+V2 demo catalog             success
+V3 course assets video progress success
+```
+
+Validação segura no PowerShell:
+
+```powershell
+git pull --ff-only origin feature/course-assets-video-gating
+docker compose -p cursohub-lms up -d --build backend frontend
+docker compose -p cursohub-lms ps
+curl.exe -i http://localhost:8080/actuator/health
+docker compose -p cursohub-lms exec -T db psql -U cursohub -d cursohub -c "SELECT version,description,success FROM flyway_schema_history ORDER BY installed_rank;"
+```
