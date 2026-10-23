@@ -4,6 +4,7 @@ import type { CourseTheme } from '../services/courseTheme'
 import type { AuthSession } from '../services/auth'
 import type { Course } from '../services/catalog'
 import { formatDuration, levels, loadCourse } from '../services/catalog'
+import {publicCoverUrl} from '../services/courseCover'
 import { enrollInCourse } from '../services/enrollment'
 
 interface CourseModalProps {
@@ -62,6 +63,9 @@ export function CourseModal({ course, session, theme, onThemeChange, onClose, on
     }}>
       <section className="course-modal" role="dialog" aria-modal="true" aria-labelledby="course-modal-title">
         <button className="close-modal" type="button" onClick={onClose} disabled={busy} aria-label="Fechar">×</button>
+        {publicCoverUrl(details.thumbnailUrl)&&
+          <img className="course-modal-cover" src={publicCoverUrl(details.thumbnailUrl)!}
+               alt={`Capa do curso ${details.title}`}/>}
         <div className="modal-label">CONHEÇA O CURSO</div>
         <h2 id="course-modal-title">{details.title}</h2>
         <p className="modal-description">{details.description}</p>
