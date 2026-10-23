@@ -79,7 +79,7 @@ public final class InstructorStudioService implements InstructorStudioUseCase {
         }
         return store.appendLesson(instructorId, courseId, moduleId,
                 new CreateLessonCommand(title, command.kind(), url, bodyText,
-                                        command.durationSeconds(), command.required()));
+                                        command.durationSeconds(), command.required() || command.kind() == LessonKind.VIDEO));
     }
 
     @Override
