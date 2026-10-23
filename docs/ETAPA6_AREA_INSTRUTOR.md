@@ -121,3 +121,29 @@ Não altere a estrutura existente do volume PostgreSQL. **Nunca execute `docker 
 - [ ] Temas visuais funcionam no Estúdio.
 
 A massa de testes criada no GitHub Actions fica apenas no PostgreSQL efêmero do pipeline, não no seu banco local.
+
+## 8. Formatação Markdown para aulas de texto
+
+Aulas do tipo `TEXT` são renderizadas com Markdown, suporte GFM (listas, tabelas e tarefas) e realce de sintaxe. O texto continua no campo `lessons.body_text` do PostgreSQL; **não há migração de banco**.
+
+Digite por exemplo no Estúdio:
+
+    # Java 21 — Introdução
+
+    ## Objetivo
+    Entender o método **main**.
+
+    - Crie a classe `Main`
+    - Execute o programa
+
+    \`\`\`java
+    public class Main {
+        public static void main(String[] args) {
+            System.out.println("Olá, CursoHub!");
+        }
+    }
+    \`\`\`
+
+**Segurança:** HTML bruto é ignorado, o conteúdo gerado é sanitizado, links só abrem destinos HTTPS e imagens remotas são desabilitadas. O código Java mostrado é ilustrativo e **não é executado**.
+
+**Teste visual:** abra uma aula com esse conteúdo, confirme os subtítulos, listas e blocos de código formatados, e experimente Claro/Moderado/Black. A porcentagem de progresso muda somente quando o aluno confirma a conclusão da aula.
