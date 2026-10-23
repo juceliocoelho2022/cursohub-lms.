@@ -13,7 +13,7 @@
 
 > [!IMPORTANT]
 > **Projeto em desenvolvimento — não é um serviço comercial em produção.**
-> Este README documenta a versão da branch [`feature/social-links-course-sharing`](https://github.com/juceliocoelho2022/cursohub-lms./tree/feature/social-links-course-sharing), que reúne funcionalidades ainda em revisão. A branch `main` permanece estável, mas **não inclui necessariamente todos os recursos descritos aqui**. As integrações de pagamento, ativação de assinaturas e contas oficiais de redes sociais ainda não estão disponíveis.
+> Este README descreve as funcionalidades integradas à branch `main` por meio dos PRs #8 a #12. A implementação de avaliações e certificados permanece separada no [PR #7](https://github.com/juceliocoelho2022/cursohub-lms./pull/7). Pagamentos, ativação de assinaturas e perfis oficiais de redes sociais ainda não estão disponíveis.
 
 ## Navegação
 
@@ -153,25 +153,19 @@ cursohub-lms/
 > [!CAUTION]
 > Se você já usa o CursoHub em `C:\Projetos\cursohub-lms-repo`, **preserve o arquivo `.env` e o volume do banco**. Não execute `docker compose down -v`: esse comando remove os dados do PostgreSQL. Use sempre `-p cursohub-lms` para manter o mesmo projeto Compose entre as branches.
 
-### 1. Obter a versão documentada
+### 1. Atualizar a versão principal
 
-A partir do seu clone local:
+A partir de seu clone local:
 
 ```powershell
 cd C:\Projetos\cursohub-lms-repo
 git status
 git fetch origin
-git switch --track origin/feature/social-links-course-sharing
+git switch main
+git pull --ff-only origin main
 ```
 
-Se a branch já existir localmente:
-
-```powershell
-git switch feature/social-links-course-sharing
-git pull --ff-only origin feature/social-links-course-sharing
-```
-
-Verifique o `git status` antes de trocar de branch. Não descarte modificações locais sem analisá-las.
+Se o repositório ainda não estiver clonado, use o endereço disponível no topo desta página. Verifique o `git status` antes de trocar de branch: não descarte modificações locais sem analisá-las. O nome remoto do repositório contém um **ponto final** (`cursohub-lms.`), então utilize a URL indicada pelo GitHub para clonar.
 
 ### 2. Configurar o ambiente
 
@@ -225,7 +219,7 @@ docker compose -p cursohub-lms logs --tail=120 backend
 docker compose -p cursohub-lms exec -T db psql -U cursohub -d cursohub -c "SELECT version,description,success FROM flyway_schema_history ORDER BY installed_rank;"
 ```
 
-Nesta branch são esperadas as versões **V1, V2 (demo), V3, V4, V5 e V6**, todas com `success=t`.
+Na versão principal atual são esperadas as versões **V1, V2 (demo), V3, V4, V5 e V6**, todas com `success=t`.
 
 ### Desenvolvimento sem reconstruir o frontend a cada alteração
 
@@ -332,20 +326,19 @@ npm run build
 | [Home editorial](docs/HOME_EDITORIAL_TECH_FIAP_INSPIRED.md) | Design e homologação |
 | [Roadmap](docs/ROADMAP.md) | Evolução planejada do produto |
 
-**Próximos marcos:** integrar e homologar os PRs de funcionalidades, finalizar avaliações/certificados, implementar checkout seguro, ativação e expiração de assinaturas, melhorias de acessibilidade e publicação em domínio próprio.
+**Próximos marcos:** validar e integrar avaliações/certificados (PR #7), implementar checkout seguro, ativação e expiração de assinaturas, melhorar a acessibilidade e publicar a plataforma em domínio próprio.
 
-### Estado das branches
+### Histórico de entregas
 
-O desenvolvimento está organizado em **pull requests de rascunho**, ainda não mesclados na `main`:
+As funcionalidades abaixo foram consolidadas na `main`, respeitando a sequência de dependências:
 
-- [#7 — Avaliações e certificados](https://github.com/juceliocoelho2022/cursohub-lms./pull/7) — desenvolvimento independente.
 - [#8 — Capa dos cursos](https://github.com/juceliocoelho2022/cursohub-lms./pull/8).
 - [#9 — Preços, planos e fidelidade](https://github.com/juceliocoelho2022/cursohub-lms./pull/9).
 - [#10 — Home premium](https://github.com/juceliocoelho2022/cursohub-lms./pull/10).
 - [#11 — Home editorial tech](https://github.com/juceliocoelho2022/cursohub-lms./pull/11).
-- [#12 — Redes sociais e compartilhamento](https://github.com/juceliocoelho2022/cursohub-lms./pull/12).
+- [#12 — Redes sociais, compartilhamento e documentação](https://github.com/juceliocoelho2022/cursohub-lms./pull/12).
 
-Os PRs **#8 → #9 → #10 → #11 → #12** são dependentes em sequência; a integração deverá respeitar essas dependências. O PR #7 segue separado.
+O [PR #7 — Avaliações e certificados](https://github.com/juceliocoelho2022/cursohub-lms./pull/7) continua independente e **não foi integrado** nesta entrega.
 
 ---
 
