@@ -27,3 +27,41 @@
 .auth-switch button:hover{text-decoration:underline}
 .auth-form button:disabled,.auth-switch button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:550px){.nav-account{gap:6px}.nav-account .nav-cta,.nav-signup{font-size:11px;padding:9px 10px}.account-greeting{font-size:11px}.nav-row{gap:6px}}
+
+/* Student Dashboard — dados das matrículas, nenhum progresso fictício */
+.dashboard-main{min-height:calc(100vh - 160px);background:#f7f9fb;padding:48px 0 105px;color:#15283b}
+.dashboard-breadcrumb{font-size:11px;letter-spacing:1.5px;font-weight:800;color:#7e91a3;margin-bottom:40px}
+.dashboard-breadcrumb span{color:#9bcab2;margin:0 12px}
+.dashboard-heading{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:35px}
+.dashboard-eyebrow{color:#257e65;font-size:11px}
+.dashboard-eyebrow .eyebrow-dot{background:#37a477}
+.dashboard-heading h1{font:800 clamp(32px,4vw,49px)/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-1.8px;margin:13px 0 8px}
+.dashboard-sparkle{color:#42bb83;font-size:29px;margin-left:14px;vertical-align:top}
+.dashboard-heading p{color:#728499;font-size:14px}
+.dashboard-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:55px}
+.dashboard-stat{background:#fff;border:1px solid #e7edf2;border-radius:16px;padding:27px 30px;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 20px #00000008}
+.stat-icon{display:grid;place-items:center;background:#e8f7ef;border-radius:11px;width:37px;height:37px;color:#2a9970;font-size:19px;margin-bottom:13px}
+.stat-value{font:800 39px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-1px}
+.stat-label{color:#73859a;font-size:13px}
+.dashboard-section-header{margin-bottom:23px}
+.dashboard-section-header h2{font:800 27px 'Plus Jakarta Sans',sans-serif;letter-spacing:-1px;margin:12px 0}
+.dashboard-state,.dashboard-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:55px 32px;background:#fff;border:1px solid #e7edf2;border-radius:19px;min-height:300px}
+.dashboard-state>p,.dashboard-empty>p{color:#798b9e;font-size:14px;max-width:440px;line-height:1.85}
+.dashboard-empty-icon{display:grid;place-items:center;background:#ecfaf2;color:#23996b;border-radius:18px;font-size:38px;width:75px;height:75px;margin-bottom:12px}
+.dashboard-empty h3{font:800 24px 'Plus Jakarta Sans',sans-serif;letter-spacing:-.8px;margin:6px 0}
+.dashboard-empty .primary-btn{margin-top:16px}
+.dashboard-empty>span{display:block;color:#91a0ae;font-size:11px;margin-top:18px}
+.dashboard-course-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.dashboard-course{background:white;border:1px solid #e4ebf1;border-radius:16px;padding:26px;box-shadow:0 6px 18px #00000008}
+.dashboard-course-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dashboard-course-category{font-size:12px;font-weight:700;color:#198b68}
+.dashboard-course-status{font-size:11px;font-weight:800;background:#e7f2ff;color:#3872a5;padding:7px 12px;border-radius:30px}
+.dashboard-course-status.is-completed{background:#e2f7ed;color:#18825b}
+.dashboard-course h3{font:800 19px/1.4 'Plus Jakarta Sans',sans-serif;margin:19px 0 25px;letter-spacing:-.4px}
+.dashboard-progress-info{display:flex;justify-content:space-between;align-items:center;gap:15px;color:#75889a;font-size:12px}
+.dashboard-progress-info strong{color:#194a3b;font-size:16px}
+.dashboard-progress-track{height:9px;background:#e7edf0;border-radius:9px;overflow:hidden;margin:12px 0}
+.dashboard-progress-track>div{height:100%;background:#43b687;border-radius:9px;transition:width .3s}
+.dashboard-lessons{font-size:12px;color:#82909d;margin:13px 0 0}
+@media(max-width:750px){.dashboard-heading{flex-direction:column;align-items:flex-start}.dashboard-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.dashboard-stat{padding:15px}.stat-value{font-size:30px}.stat-label{font-size:11px}.dashboard-course-grid{grid-template-columns:1fr}}
+@media(max-width:450px){.dashboard-main{padding:35px 0 65px}.dashboard-breadcrumb{margin-bottom:25px}.dashboard-stats{grid-template-columns:1fr}.dashboard-stat{flex-direction:row;align-items:center;gap:18px}.stat-icon{margin:0}.stat-label{margin-left:auto}.dashboard-empty{padding:37px 17px}.account-greeting{display:none}}
