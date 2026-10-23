@@ -1288,3 +1288,12 @@ a.ch-social-network:focus-visible{outline:2px solid #9bedbd;outline-offset:-4px}
 @media(min-width:611px){
   .ch-social-network:last-child:nth-child(odd){grid-column:1 / -1;border-right:0}
 }
+
+/* Home: busca direta no primeiro contato, alinhada ao catálogo existente. */
+.ch-hero-search { display: flex; width: min(100%, 590px); margin: 24px 0 18px; padding: 6px; gap: 6px; border: 1px solid rgba(255,255,255,.28); border-radius: 12px; background: rgba(8,16,36,.7); }
+.ch-hero-search:focus-within { outline: 2px solid #a9c3ff; outline-offset: 3px; }
+.ch-hero-search input { flex: 1; min-width: 0; padding: 12px 14px; border: 0; outline: 0; background: transparent; color: #fff; font: inherit; }
+.ch-hero-search input::placeholder { color: #c1cade; opacity: 1; }
+.ch-hero-search button { flex-shrink: 0; border: 0; border-radius: 8px; padding: 12px 16px; background: #eef2ff; color: #101d3a; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.ch-hero-search button:hover { background: #d6e2ff; }
+@media (max-width: 520px) { .ch-hero-search { flex-direction: column; } .ch-hero-search button { width: 100%; } }
