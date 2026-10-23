@@ -32,6 +32,11 @@ export function StudentDashboard({ token, name, onExplore, onOpenCourse, onLogou
     return () => controller.abort()
   }, [token])
 
+  const measurableCourses = dashboard?.courses.filter(course => course.requiredLessons > 0) ?? []
+  const overallProgress = measurableCourses.length
+    ? Math.round(measurableCourses.reduce((sum, course) => sum + course.progressPercent, 0) / measurableCourses.length)
+    : null
+
   const nextCourse = dashboard?.courses.find(course => course.status === 'ACTIVE' && course.requiredLessons > 0 && course.progressPercent < 100)
 
   return (
@@ -78,6 +83,23 @@ export function StudentDashboard({ token, name, onExplore, onOpenCourse, onLogou
                 <span className="stat-label">Concluídos</span>
               </div>
             </div>
+
+            <section className="dashboard-overview" aria-labelledby="learning-overview-heading">
+              <div>
+                <div className="section-topline"><span className="mini-rule" /> VISÃO GERAL</div>
+                <h2 id="learning-overview-heading">Seu aprendizado em números</h2>
+                <p>Você está matriculado em {dashboard.enrolledCourses} curso{dashboard.enrolledCourses === 1 ? '' : 's'}, com {dashboard.completedCourses} concluído{dashboard.completedCourses === 1 ? '' : 's'}.</p>
+              </div>
+              <div className="dashboard-overview-progress">
+                <strong>{overallProgress === null ? '—' : `${overallProgress}%`}</strong>
+                <span>Progresso médio dos cursos com aulas obrigatórias</span>
+                {overallProgress !== null && <div className="dashboard-progress-track" role="progressbar"
+                  aria-label="Progresso médio dos cursos com aulas obrigatórias"
+                  aria-valuemin={0} aria-valuemax={100} aria-valuenow={overallProgress}>
+                  <div style={{ width: `${overallProgress}%` }} />
+                </div>}
+              </div>
+            </section>
 
             {nextCourse && (
               <section className="dashboard-continue" aria-labelledby="continue-course-heading">
