@@ -87,7 +87,7 @@ export function CourseModal({ course, session, theme, onThemeChange, onClose, on
           <p>Inscreva-se no curso para adicioná-lo ao seu painel. As aulas e a marcação de progresso serão disponibilizadas em uma próxima etapa.</p>
         </div>
         <SocialShare title={details.title} slug={details.slug} compact/>
-        {error && <p className="inline-error" role="alert">{error}</p>
+        {error && <p className="inline-error" role="alert">{error}</p>}
 
         {details.priceCents>0 ? (
           <p className="modal-paid-notice">Este curso é pago. Estamos preparando a contratação segura; ainda não é possível comprá-lo nem realizar matrícula.</p>
