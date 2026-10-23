@@ -310,7 +310,7 @@ jobs:
             -d '{"title":"Aula depois do vídeo","kind":"TEXT","bodyText":"Conteúdo só liberado depois dos cem por cento","durationSeconds":50,"required":true}' \
             "$INSTRUCTOR_URL/$OWN_COURSE_ID/modules/$MODULE_ID/lessons")
           [[ "$code" == "201" ]] || { echo "Criar terceira aula: $code"; exit 1; }
-          printf '\\x00\\x00\\x00\\x18ftypisom' > /tmp/ci-video.mp4
+          printf '\x00\x00\x00\x18ftypisom' > /tmp/ci-video.mp4
           code=$(curl -sS -o /tmp/ci-asset-video.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
             -F 'file=@/tmp/ci-video.mp4;type=video/mp4' \
