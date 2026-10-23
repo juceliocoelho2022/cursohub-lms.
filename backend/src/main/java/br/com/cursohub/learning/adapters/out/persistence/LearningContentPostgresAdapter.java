@@ -86,7 +86,7 @@ public class LearningContentPostgresAdapter implements LearningContentReaderPort
                         blocked ? null : original.contentUrl(),
                         blocked ? null : original.bodyText(),original.durationSeconds(),
                         original.required(),original.completed(),blocked));
-                if(original.required() && !original.completed()) blocked=true;
+                if((original.required() || original.kind() == LessonKind.VIDEO) && !original.completed()) blocked=true;
             }
             guarded.put(module.id(),items);
         }
