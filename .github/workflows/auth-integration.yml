@@ -47,6 +47,26 @@ jobs:
           key=$(openssl rand -base64 32 | tr -d '\n')
           echo "::add-mask::$key"
           echo "JWT_SECRET_BASE64=$key" >> "$GITHUB_ENV"
+      - name: Verificar unicidade das versões Flyway (inclusive demonstração)
+        shell: bash
+        run: |
+          set -euo pipefail
+          find backend/src/main/resources/db -type f -name 'V*__*.sql' -print | sort | awk -F/ '
+            {
+              filename=$NF
+              split(filename, pieces, "__")
+              version=pieces[1]
+              if (seen[version] != "") {
+                print "Versão Flyway duplicada: " version
+                print "  " seen[version]
+                print "  " $0
+                bad=1
+              } else {
+                seen[version]=$0
+              }
+            }
+            END { if (bad) exit 1; print "Todas as versões Flyway são únicas." }
+          '
       - name: Smoke test PostgreSQL + JWT
         shell: bash
         working-directory: backend
