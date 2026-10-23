@@ -34,10 +34,9 @@ public class AssetPostgresAdapter implements CourseAssetStorePort {
                 WHERE l.id=? AND m.course_id=? AND l.kind='VIDEO'
                 """,(rs,i)->rs.getObject(1,UUID.class),lesson,course);
             if(rows.isEmpty()) throw new AssetValidationException("Aula VIDEO não pertence a este curso");
-            // Replacing the linked video resets the viewing progress in a single transaction.
-            jdbc.update("DELETE FROM video_playback_progress WHERE lesson_id=?",lesson);
-            jdbc.update("DELETE FROM lesson_progress WHERE lesson_id=?",lesson);
-            jdbc.update("DELETE FROM course_assets WHERE lesson_id=?",lesson);
+            Long alreadyLinked=jdbc.queryForObject("SELECT COUNT(*) FROM course_assets WHERE lesson_id=?",Long.class,lesson);
+            if(alreadyLinked!=null && alreadyLinked>0)
+                throw new AssetValidationException("Vídeo já enviado: para substituir, crie uma nova versão da aula");
         }
         UUID id=UUID.randomUUID();
         jdbc.update("""
@@ -84,7 +83,7 @@ public class AssetPostgresAdapter implements CourseAssetStorePort {
             "AND (a.lesson_id IS NULL OR NOT EXISTS ("+
             " SELECT 1 FROM lessons prev JOIN course_modules pm ON pm.id=prev.module_id "+
             " LEFT JOIN lesson_progress lp ON lp.lesson_id=prev.id AND lp.enrollment_id=e.id "+
-            " WHERE pm.course_id=c.id AND prev.is_required=TRUE AND lp.id IS NULL "+
+            " WHERE pm.course_id=c.id AND (prev.is_required=TRUE OR prev.kind='VIDEO') AND lp.id IS NULL "+
             " AND (pm.position<target_m.position OR (pm.position=target_m.position AND prev.position<target.position))"+
             "))",
             (rs,i)->new AssetBytes(map(rs),rs.getBytes("contents")),student,slug,asset);
