@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/api/v1/courses", "/api/v1/courses/**",
                                  "/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/students/me/dashboard").hasRole("STUDENT")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
         return http.build();
