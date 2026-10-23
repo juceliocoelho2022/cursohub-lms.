@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { CourseThemeSelector } from './CourseThemeSelector'
+import { CourseAssetsPanel } from './CourseAssetsPanel'
 import type { CourseTheme } from '../services/courseTheme'
 import { instructorApi } from '../services/instructor'
 import type { CourseDraftForm, InstructorCourse, InstructorCourseContent, LessonForm } from '../services/instructor'
@@ -252,11 +253,13 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                               O aluno verá o conteúdo formatado.
                             </span>
                           </label>
-                        : <label>URL HTTPS do material
-                            <input type="url" required placeholder="https://..."
-                                   value={lesson.contentUrl ?? ''}
-                                   onChange={e => setLesson(v => ({ ...v, contentUrl: e.target.value }))}/>
-                          </label>}
+                        : lesson.kind === 'VIDEO'
+                          ? <p className="instructor-markdown-hint">Após salvar a aula, anexe o arquivo MP4/WEBM na seção Vídeo para uma aula. Informe a duração real do vídeo em segundos.</p>
+                          : <label>URL HTTPS do material
+                              <input type="url" required placeholder="https://..."
+                                     value={lesson.contentUrl ?? ''}
+                                     onChange={e => setLesson(v => ({ ...v, contentUrl: e.target.value }))}/>
+                            </label>}
                       <label className="instructor-checkbox">
                         <input type="checkbox" checked={lesson.required}
                                onChange={e => setLesson(v => ({ ...v, required: e.target.checked }))}/>
@@ -266,6 +269,7 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                     </form>}
                   </>
                 )}
+                <CourseAssetsPanel token={token} courseId={content.course.id} modules={content.modules}/>
                 <div className="instructor-content-outline">
                   <h3>Estrutura do curso</h3>
                   {content.modules.length === 0 && <p>Adicione o primeiro módulo para começar.</p>}
