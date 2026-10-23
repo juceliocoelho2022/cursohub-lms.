@@ -45,7 +45,7 @@ function isMembershipPlan(value:unknown):value is MembershipPlan {
   return (p.code==='MENSAL'||p.code==='SEMESTRAL'||p.code==='ANUAL') &&
     typeof p.title==='string' &&
     typeof p.durationMonths==='number' &&
-    Number.isInteger(p.priceCents) &&
+    typeof p.priceCents==='number' && Number.isInteger(p.priceCents) &&
     typeof p.discountPercent==='number' &&
     (p.courseLimit===null||typeof p.courseLimit==='number') &&
     Array.isArray(p.benefits)&&p.benefits.every(x=>typeof x==='string')
