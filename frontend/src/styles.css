@@ -709,3 +709,67 @@
   font-size: 13px;
   margin: 0 0 20px;
 }
+
+
+/* Etapa 8 — avaliações e certificados: componentes compatíveis com as três aparências */
+.assessment-editor .assessment-summary {
+  background:var(--course-soft);border:1px solid var(--course-border);
+  border-radius:12px;padding:17px;color:var(--course-text);
+}
+.assessment-question-edit {
+  border:1px solid var(--course-border);border-radius:12px;
+  padding:18px;display:flex;flex-direction:column;gap:12px;
+  min-width:0;color:var(--course-text);
+}
+.assessment-question-edit legend {padding:0 8px;font-size:14px;font-weight:800;color:var(--course-accent)}
+.assessment-option-edit{display:flex;align-items:center;gap:10px}
+.assessment-option-edit input[type="radio"]{width:16px;height:16px;flex:none;accent-color:var(--course-accent)}
+.assessment-option-edit input:not([type="radio"]){
+  min-width:0;flex:1;background:var(--course-input);border:1px solid var(--course-border);
+  color:var(--course-text);border-radius:8px;padding:10px;
+}
+.course-assessment{
+  margin:24px 0;padding:30px;background:var(--course-card);
+  border:1px solid var(--course-border);border-radius:16px;
+  box-shadow:var(--course-shadow);color:var(--course-text);
+}
+.course-assessment h2{font:800 24px 'Plus Jakarta Sans',sans-serif;margin:0 0 20px}
+.course-assessment h3{font:800 18px 'Plus Jakarta Sans',sans-serif}
+.course-assessment p{font-size:13px;line-height:1.7;color:var(--course-muted)}
+.course-quiz-meta{background:var(--course-soft);border:1px solid var(--course-border);border-radius:12px;padding:20px;margin-bottom:22px}
+.course-quiz-meta h3{margin:0 0 10px}
+.course-quiz-meta p{margin:0}
+.course-quiz-question{border:1px solid var(--course-border);border-radius:12px;padding:17px;margin:0 0 15px}
+.course-quiz-question legend{font-size:14px;font-weight:800;line-height:1.5;padding:0 7px;max-width:100%}
+.course-quiz-option{display:flex;gap:12px;align-items:center;background:var(--course-soft);
+  padding:13px;margin:8px 0;border:1px solid var(--course-border);border-radius:10px;cursor:pointer;font-size:13px}
+.course-quiz-option:has(input:checked){border-color:var(--course-accent)}
+.course-quiz-option input{width:16px;height:16px;flex-shrink:0;accent-color:var(--course-accent)}
+.course-quiz-result,.course-certificate-hint{border-left:3px solid var(--course-accent);padding-left:13px;margin:16px 0}
+.course-certificate{margin:23px 0 0}
+.course-certificate-sheet{
+  padding:40px 28px;text-align:center;border:2px solid #326d5c;
+  outline:1px solid #b5dfc8;outline-offset:-12px;border-radius:10px;
+  background:#fffdf6;color:#152840;
+}
+.course-certificate-brand{font-weight:900;color:#137a55;font-size:19px}
+.course-certificate-sheet h3{letter-spacing:3px;font-size:22px;margin:25px 0;color:#152840}
+.course-certificate-sheet p{color:#526077}
+.course-certificate-sheet strong{display:block;font-size:clamp(20px,3vw,29px);margin:20px 0;border-bottom:1px solid #c2d9ce;padding-bottom:14px;color:#152840}
+.course-certificate-sheet h4{font-size:20px;color:#152840;margin:15px 0}
+.course-certificate-sheet .course-certificate-code{font:12px/1.7 ui-monospace,Consolas,monospace;overflow-wrap:anywhere;margin:22px 0;color:#273b50}
+.course-certificate-sheet a{color:#137a55}
+.certificate-print-button{margin-top:20px}
+@media(max-width:600px){.course-assessment{padding:20px}.course-certificate-sheet{padding:35px 16px}}
+@media print{
+  @page{size:A4 portrait;margin:16mm}
+  body *{visibility:hidden!important}
+  #cursohub-certificado,#cursohub-certificado *{visibility:visible!important}
+  #cursohub-certificado{position:absolute!important;top:0;left:0;width:100%;margin:0;padding:0}
+  #cursohub-certificado .course-certificate-sheet{
+    border:3px solid #326d5c;min-height:190mm;display:flex;align-items:center;
+    justify-content:center;flex-direction:column;box-shadow:none!important;
+    print-color-adjust:exact;-webkit-print-color-adjust:exact;
+  }
+  #cursohub-certificado .certificate-print-button{display:none!important}
+}

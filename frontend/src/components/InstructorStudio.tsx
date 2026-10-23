@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { CourseThemeSelector } from './CourseThemeSelector'
 import { CourseAssetsPanel } from './CourseAssetsPanel'
+import { InstructorAssessmentEditor } from './InstructorAssessmentEditor'
 import type { CourseTheme } from '../services/courseTheme'
 import { instructorApi } from '../services/instructor'
 import type { CourseDraftForm, InstructorCourse, InstructorCourseContent, LessonForm } from '../services/instructor'
@@ -271,6 +272,7 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
                   </>
                 )}
                 <CourseAssetsPanel token={token} courseId={content.course.id} modules={content.modules}/>
+                <InstructorAssessmentEditor token={token} courseId={content.course.id} editable={editable}/>
                 <div className="instructor-content-outline">
                   <h3>Estrutura do curso</h3>
                   {content.modules.length === 0 && <p>Adicione o primeiro módulo para começar.</p>}
