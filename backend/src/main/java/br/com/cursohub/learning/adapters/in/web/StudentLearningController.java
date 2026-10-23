@@ -2,7 +2,6 @@ package br.com.cursohub.learning.adapters.in.web;
 
 import br.com.cursohub.learning.application.model.LessonCompletionReceipt;
 import br.com.cursohub.learning.application.port.in.StudentLearningUseCase;
-import br.com.cursohub.learning.domain.LearningCourse;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -18,8 +17,8 @@ public class StudentLearningController {
     }
 
     @GetMapping("/lessons")
-    public LearningCourse lessons(@AuthenticationPrincipal Jwt jwt, @PathVariable String slug) {
-        return useCase.viewCourse(UUID.fromString(jwt.getSubject()), slug);
+    public LearningCourseResponse lessons(@AuthenticationPrincipal Jwt jwt, @PathVariable String slug) {
+        return LearningCourseResponse.from(useCase.viewCourse(UUID.fromString(jwt.getSubject()), slug));
     }
 
     @PostMapping("/lessons/{lessonId}/complete")
