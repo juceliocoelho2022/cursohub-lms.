@@ -36,6 +36,7 @@ cursohub-lms/
 │   └── ROADMAP.md
 ├── scripts/check_architecture.py
 ├── compose.yaml
+├── compose.local-db-port.yaml
 ├── .env.example
 └── .gitignore
 ```
@@ -48,7 +49,7 @@ O domínio `Course` não utiliza `@Entity`. O mapeamento do banco fica isolado e
 
 ## Como executar com Docker
 
-Pré-requisitos: **Docker Desktop** com Compose e portas **3000**, **8080** e **5432** disponíveis. Na pasta clonada:
+Pré-requisitos: **Docker Desktop** com Compose e portas **3000** e **8080** disponíveis. A porta PostgreSQL **5432 não é publicada no Windows**; a comunicação entre API e banco acontece internamente pela rede Docker. Na pasta clonada:
 
 ```powershell
 Copy-Item .env.example .env
@@ -76,8 +77,9 @@ Pré-requisitos: **Java 21**, **Maven**, **Node.js 22**, **npm** e PostgreSQL.
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up -d db
-$env:DB_URL = "jdbc:postgresql://localhost:5432/cursohub"
+# A publicação opcional usa 5433 no Windows, evitando o conflito na 5432
+docker compose -f compose.yaml -f compose.local-db-port.yaml up -d db
+$env:DB_URL = "jdbc:postgresql://localhost:5433/cursohub"
 $env:DB_USER = "cursohub"
 $env:DB_PASSWORD = "<defina-a-mesma-senha-do-arquivo-env>"
 $env:FLYWAY_LOCATIONS = "classpath:db/migration,classpath:db/demo"
@@ -122,7 +124,7 @@ A verificação de fronteiras arquiteturais passou no ambiente de geração. A c
 
 - **Não versionar** `.env`, tokens, chaves ou senhas de produção.
 - A identidade fictícia no seed está inativa, com senha inutilizável.
-- A porta PostgreSQL está restrita a `127.0.0.1` no Compose.
+- A porta do PostgreSQL não é publicada no `compose.yaml` padrão. Para clientes locais no Windows, o override opcional `compose.local-db-port.yaml` expõe `127.0.0.1:5433`.
 - **Não existem endpoints de escrita sem autenticação** na primeira etapa.
 - Antes de produção: Spring Security, JWT, RBAC, proteção de mídia, LGPD, backups, logs e monitoramento.
 
