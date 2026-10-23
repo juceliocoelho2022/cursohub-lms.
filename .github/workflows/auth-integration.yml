@@ -1,0 +1,104 @@
+name: CursoHub Auth Integration
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authentication-smoke:
+    name: API + PostgreSQL + JWT
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: cursohub_ci
+          POSTGRES_USER: cursohub
+          POSTGRES_PASSWORD: cursohub_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cursohub -d cursohub_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      DB_URL: jdbc:postgresql://localhost:5432/cursohub_ci
+      DB_USER: cursohub
+      DB_PASSWORD: cursohub_ci_only
+      FLYWAY_LOCATIONS: classpath:db/migration
+      PORT: 8080
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Gerar chave JWT temporaria para CI
+        shell: bash
+        run: echo "JWT_SECRET_BASE64=$(openssl rand -base64 32 | tr -d '\n')" >> "$GITHUB_ENV"
+      - name: Smoke test PostgreSQL + JWT
+        shell: bash
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          mvn -B -ntp spring-boot:run > /tmp/cursohub-integration.log 2>&1 &
+          APP_PID=$!
+          trap 'kill "$APP_PID" 2>/dev/null || true' EXIT
+
+          ready=false
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:8080/actuator/health | jq -e '.status == "UP"' >/dev/null 2>&1; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [[ "$ready" != "true" ]]; then
+            echo "A API nao iniciou corretamente. Log:"
+            tail -100 /tmp/cursohub-integration.log
+            exit 1
+          fi
+
+          code=$(curl -sS -o /tmp/noauth.json -w '%{http_code}' http://localhost:8080/api/v1/auth/me)
+          [[ "$code" == "401" ]] || { echo "GET /auth/me sem token: $code (esperado 401)"; exit 1; }
+
+          payload='{"name":"Aluno CI","email":"  ALUNO.CI@example.com  ","password":"SenhaForteCI#2026"}'
+          code=$(curl -sS -o /tmp/register.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' -d "$payload" http://localhost:8080/api/v1/auth/register)
+          [[ "$code" == "201" ]] || { echo "POST /register: $code (esperado 201)"; cat /tmp/register.json; exit 1; }
+
+          jq -e '.role == "STUDENT" and .email == "aluno.ci@example.com" and (.accessToken | length > 32)' /tmp/register.json >/dev/null
+          TOKEN=$(jq -r '.accessToken' /tmp/register.json)
+
+          code=$(curl -sS -o /tmp/me.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
+            http://localhost:8080/api/v1/auth/me)
+          [[ "$code" == "200" ]] || { echo "GET /auth/me com token: $code (esperado 200)"; exit 1; }
+          jq -e '.role == "STUDENT" and .email == "aluno.ci@example.com"' /tmp/me.json >/dev/null
+
+          code=$(curl -sS -o /tmp/duplicate.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' -d "$payload" http://localhost:8080/api/v1/auth/register)
+          [[ "$code" == "409" ]] || { echo "Cadastro duplicado: $code (esperado 409)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/login.json -w '%{http_code}' -H 'Content-Type: application/json' \
+            -d '{"email":"aluno.ci@example.com","password":"SenhaForteCI#2026"}' \
+            http://localhost:8080/api/v1/auth/login)
+          [[ "$code" == "200" ]] || { echo "Login valido: $code (esperado 200)"; exit 1; }
+          jq -e '.role == "STUDENT" and (.accessToken | length > 32)' /tmp/login.json >/dev/null
+
+          code=$(curl -sS -o /tmp/invalid.json -w '%{http_code}' -H 'Content-Type: application/json' \
+            -d '{"email":"aluno.ci@example.com","password":"senha-incorreta"}' \
+            http://localhost:8080/api/v1/auth/login)
+          [[ "$code" == "401" ]] || { echo "Login invalido: $code (esperado 401)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/catalog.json -w '%{http_code}' http://localhost:8080/api/v1/courses)
+          [[ "$code" == "200" ]] || { echo "Catalogo publico: $code (esperado 200)"; exit 1; }
+
+          echo 'Smoke test OK: banco/Flyway, cadastro, JWT, /me, duplicidade, login e catalogo publico.'
