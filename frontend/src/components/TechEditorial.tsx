@@ -1,6 +1,11 @@
+import { useState } from 'react'
+import type { ReactNode } from 'react'
+
 interface TechEditorialProps {
+  children?: ReactNode
   onExplore: () => void
   onPlans: () => void
+  onSearch: (term: string) => void
   onCategory: (value: string) => void
 }
 
@@ -34,7 +39,8 @@ const tracks = [
   },
 ]
 
-export function TechEditorial({onExplore,onPlans,onCategory}:TechEditorialProps) {
+export function TechEditorial({onExplore,onPlans,onCategory,onSearch,children}:TechEditorialProps) {
+  const [query, setQuery] = useState('')
   return <>
     <section className="ch-fiap-hero" aria-labelledby="ch-hero-heading">
       <div className="ch-hero-mesh" aria-hidden="true"/>
@@ -60,6 +66,12 @@ export function TechEditorial({onExplore,onPlans,onCategory}:TechEditorialProps)
                 CONHECER PLANOS <span aria-hidden="true">→</span>
               </button>
             </div>
+            <form className="ch-hero-search" role="search" onSubmit={event => { event.preventDefault(); onSearch(query) }}>
+              <label className="sr-only" htmlFor="hero-course-search">Buscar cursos</label>
+              <input id="hero-course-search" type="search" maxLength={120} value={query}
+                onChange={event => setQuery(event.target.value)} placeholder="O que você quer aprender? Ex.: Java" />
+              <button type="submit">BUSCAR CURSO <span aria-hidden="true">↗</span></button>
+            </form>
             <div className="ch-hero-highlights">
               <span><i aria-hidden="true"/> Conteúdos no seu ritmo</span>
               <span><i aria-hidden="true"/> Prática e projetos</span>
@@ -106,9 +118,11 @@ export function TechEditorial({onExplore,onPlans,onCategory}:TechEditorialProps)
       </div>
     </div>
 
+    {children}
+
     <section className="ch-learning-tracks" aria-labelledby="ch-learning-heading">
       <div className="container">
-        <div className="ch-section-kicker"><span>01</span> / ÁREAS DO CONHECIMENTO</div>
+        <div className="ch-section-kicker"><span>02</span> / ÁREAS DO CONHECIMENTO</div>
         <div className="ch-tracks-title">
           <h2 id="ch-learning-heading">ESCOLHA SUA <em>PRÓXIMA FRONTEIRA.</em></h2>
           <p>Encontre seu caminho e comece pelo que faz sentido para você. As áreas abaixo levam diretamente ao catálogo de cursos.</p>
@@ -133,7 +147,7 @@ export function TechEditorial({onExplore,onPlans,onCategory}:TechEditorialProps)
 
     <section className="ch-statement" aria-labelledby="ch-statement-heading">
       <div className="container ch-statement-layout">
-        <div className="ch-statement-index">02 / A EXPERIÊNCIA CURSOHUB</div>
+        <div className="ch-statement-index">03 / A EXPERIÊNCIA CURSOHUB</div>
         <h2 id="ch-statement-heading">AQUI, <em>APRENDER</em> VIRA <span>PRÁTICA.</span></h2>
         <div className="ch-statement-bottom">
           <p>Crie sua conta, escolha um curso, acompanhe suas aulas e evolua em cada etapa.

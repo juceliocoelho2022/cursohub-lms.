@@ -69,6 +69,13 @@ export default function App() {
     setView('catalog')
     setScrollTarget('courses')
   }, [])
+  const searchFromHero = useCallback((term: string) => {
+    setSearch(term.trim())
+    setCategory('')
+    setLevel('')
+    setPage(0)
+    scrollToCourses()
+  }, [scrollToCourses])
   const scrollToPlans = useCallback(() => {
     setView('catalog')
     setScrollTarget('plans')
@@ -194,12 +201,11 @@ export default function App() {
             onThemeChange={setCourseTheme}
           />
         : <main id="inicio">
-        <TechEditorial onExplore={scrollToCourses} onPlans={scrollToPlans}
-          onCategory={value=>{setCategory(value);setLevel('');setSearch('');scrollToCourses()}}/>
-
+        <TechEditorial onExplore={scrollToCourses} onPlans={scrollToPlans} onSearch={searchFromHero}
+          onCategory={value=>{setCategory(value);setLevel('');setSearch('');scrollToCourses()}}>
         <section className="catalog-section" id="cursos" ref={coursesSection}>
           <div className="container">
-            <div className="section-topline"><span className="mini-rule" /> 03 / NOSSOS CURSOS</div>
+            <div className="section-topline"><span className="mini-rule" /> 01 / NOSSOS CURSOS</div>
             <div className="section-header">
               <div><h2>ESTUDE O QUE <em>MOVE O FUTURO.</em></h2>
                 <p>Explore nossos cursos, filtre por área e comece pelo conhecimento que você quer desenvolver.</p>
@@ -256,6 +262,9 @@ export default function App() {
             )}
           </div>
         </section>
+
+        </TechEditorial>
+
 
         <MembershipPlans onExplore={scrollToCourses} token={session?.role==='STUDENT'?session.accessToken:undefined}/>
 
