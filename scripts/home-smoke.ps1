@@ -33,8 +33,11 @@ Test-Endpoint "Pagina inicial" $BaseUrl {
 
 Test-Endpoint "Saude da API" "$BackendUrl/actuator/health" {
     param($response)
-    $body = $response.Content | ConvertFrom-Json
-    if ($body.status -ne "UP") { throw "API nao esta UP." }
+    $health = ConvertFrom-Json -InputObject ([string]$response.Content)
+    $actualStatus = [string]$health.status
+    if ($actualStatus.Trim() -ne 'UP') {
+        throw ("Healthcheck inesperado: status='{0}', resposta='{1}'" -f $actualStatus, [string]$response.Content)
+    }
 }
 
 Test-Endpoint "Catalogo pelo Nginx" "$BaseUrl/api/v1/courses?page=0&size=6" {
