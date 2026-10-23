@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CourseCard } from './components/CourseCard'
 import { CourseModal } from './components/CourseModal'
+import { AuthDialog } from './components/AuthDialog'
+import type { AuthMode } from './components/AuthDialog'
+import { currentUser } from './services/auth'
+import type { AuthSession, CurrentUser } from './services/auth'
 import type { CatalogPage, Course } from './services/catalog'
 import { loadCourses } from './services/catalog'
 import './styles.css'
@@ -20,6 +24,9 @@ export default function App() {
   const [retry, setRetry] = useState(0)
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const coursesSection = useRef<HTMLElement | null>(null)
+  const [authMode, setAuthMode] = useState<AuthMode | null>(null)
+  const [session, setSession] = useState<AuthSession | null>(null)
+  const [currentProfile, setCurrentProfile] = useState<CurrentUser | null>(null)
 
   useEffect(() => {
     const handle = window.setTimeout(() => setDebouncedSearch(search.trim()), 300)
@@ -46,6 +53,24 @@ export default function App() {
   const scrollToCourses = useCallback(() => coursesSection.current?.scrollIntoView({ behavior: 'smooth' }), [])
   const closeModal = useCallback(() => setSelectedCourse(null), [])
   const resetFilters = () => { setSearch(''); setCategory(''); setLevel(''); setPage(0) }
+  const closeAuth = useCallback(() => setAuthMode(null), [])
+  const onAuthenticated = useCallback((authenticated: AuthSession) => {
+    setSession(authenticated)
+    setAuthMode(null)
+  }, [])
+  const logout = useCallback(() => { setSession(null); setCurrentProfile(null) }, [])
+
+  useEffect(() => {
+    if (!session) { setCurrentProfile(null); return }
+    let active = true
+    const expires = window.setTimeout(() => {
+      if (active) { setSession(null); setCurrentProfile(null) }
+    }, session.expiresIn * 1000)
+    currentUser(session.accessToken)
+      .then(user => { if (active) setCurrentProfile(user) })
+      .catch(() => { if (active) logout() })
+    return () => { active = false; window.clearTimeout(expires) }
+  }, [session, logout])
 
   return (
     <div className="app-shell">
@@ -58,7 +83,19 @@ export default function App() {
             <a href="#cursos">Explorar cursos</a>
             <a href="#sobre">Sobre a plataforma</a>
           </nav>
-          <button className="nav-cta" type="button" onClick={scrollToCourses}>Começar a explorar <span>↗</span></button>
+          <div className="nav-account">
+            {session ? (
+              <>
+                <span className="account-greeting">Olá, {(currentProfile?.name || session.name).split(' ')[0]}!</span>
+                <button className="nav-cta" type="button" onClick={logout}>Sair</button>
+              </>
+            ) : (
+              <>
+                <button className="nav-cta" type="button" onClick={() => setAuthMode('login')}>Entrar</button>
+                <button className="nav-signup" type="button" onClick={() => setAuthMode('register')}>Criar conta ↗</button>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -157,6 +194,7 @@ export default function App() {
       </main>
       <footer><div className="container footer-row"><span className="brand">✳ Curso<span>Hub</span><b>.</b></span><span>© {new Date().getFullYear()} CursoHub · Versão inicial de desenvolvimento</span></div></footer>
       {selectedCourse && <CourseModal course={selectedCourse} onClose={closeModal} />}
+      {authMode && <AuthDialog initialMode={authMode} onClose={closeAuth} onAuthenticated={onAuthenticated} />}
     </div>
   )
 }
