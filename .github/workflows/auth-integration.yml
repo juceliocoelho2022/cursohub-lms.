@@ -442,6 +442,127 @@ jobs:
             "http://localhost:8080/api/v1/students/me/courses/curso-publicado-instrutor-ci/assets/$PDF_ASSET_ID")
           [[ "$code" == "401" ]] || { echo "PDF sem JWT: $code"; exit 1; }
           echo 'Smoke test OK: anexos autenticados, liberação sequencial e vídeo completo 100%.'
+          # Etapa 8 — avaliação e emissão de certificados sem expor gabarito.
+          code=$(curl -sS -o /tmp/quiz-course.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"slug":"curso-avaliacao-ci","title":"Curso Avaliação CI","description":"Curso de teste para validar provas e certificados","category":"Programação","level":"INICIANTE","estimatedMinutes":40}' \
+            "$INSTRUCTOR_URL")
+          [[ "$code" == "201" ]] || { echo "Criar curso avaliação: $code"; cat /tmp/quiz-course.json; exit 1; }
+          EVAL_COURSE=$(jq -r '.id' /tmp/quiz-course.json)
+          code=$(curl -sS -o /tmp/quiz-module.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Primeiros passos"}' "$INSTRUCTOR_URL/$EVAL_COURSE/modules")
+          [[ "$code" == "201" ]] || { echo "Criar modulo avaliação: $code"; exit 1; }
+          EVAL_MODULE=$(jq -r '.id' /tmp/quiz-module.json)
+          code=$(curl -sS -o /tmp/quiz-lesson.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Introdução CI","kind":"TEXT","bodyText":"Introdução ao curso e questões finais.","durationSeconds":60,"required":true}' \
+            "$INSTRUCTOR_URL/$EVAL_COURSE/modules/$EVAL_MODULE/lessons")
+          [[ "$code" == "201" ]] || { echo "Criar aula avaliação: $code"; exit 1; }
+          EVAL_LESSON=$(jq -r '.id' /tmp/quiz-lesson.json)
+
+          EVAL_AUTHOR="$INSTRUCTOR_URL/$EVAL_COURSE/assessment"
+          code=$(curl -sS -o /tmp/quiz-invalid.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Prova inválida","passingScore":70,"maxAttempts":2,"questions":[{"statement":"Pergunta com duas corretas?","options":[{"text":"A","correct":true},{"text":"B","correct":true}]}]}' \
+            "$EVAL_AUTHOR")
+          [[ "$code" == "400" ]] || { echo "Duas alternativas corretas: $code (esperado 400)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/quiz-created.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Avaliação de Java CI","passingScore":70,"maxAttempts":2,"questions":[{"statement":"O que executa bytecode Java?","options":[{"text":"A JVM","correct":true},{"text":"Um cliente HTTP","correct":false}]}]}' \
+            "$EVAL_AUTHOR")
+          [[ "$code" == "201" ]] || { echo "Criar prova: $code"; cat /tmp/quiz-created.json; exit 1; }
+          QUIZ_ID=$(jq -r '.id' /tmp/quiz-created.json)
+          # Gabarito não pode sair sequer na resposta de autoria.
+          jq -e '.passingScore == 70 and .maxAttempts == 2 and (.questions|length)==1 and
+            ([.. | objects | keys[] | select(. == "correct" or . == "isCorrect")] | length)==0' \
+            /tmp/quiz-created.json >/dev/null
+
+          code=$(curl -sS -o /tmp/quiz-duplicate.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Avaliação repetida","passingScore":70,"maxAttempts":2,"questions":[{"statement":"Pergunta duplicada","options":[{"text":"A","correct":true},{"text":"B","correct":false}]}]}' \
+            "$EVAL_AUTHOR")
+          [[ "$code" == "409" ]] || { echo "Prova duplicada: $code (esperado 409)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/quiz-published.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" "$INSTRUCTOR_URL/$EVAL_COURSE/publish")
+          [[ "$code" == "200" ]] || { echo "Publicar curso avaliação: $code"; exit 1; }
+
+          EVAL_STUDENT="http://localhost:8080/api/v1/students/me/courses/curso-avaliacao-ci"
+          code=$(curl -sS -o /tmp/quiz-enroll.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" \
+            "http://localhost:8080/api/v1/courses/curso-avaliacao-ci/enrollments")
+          [[ "$code" == "201" ]] || { echo "Matricular avaliação: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/quiz-anonymous.json -w '%{http_code}' "$EVAL_STUDENT/assessment")
+          [[ "$code" == "401" ]] || { echo "Questões sem JWT: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/quiz-student.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" "$EVAL_STUDENT/assessment")
+          [[ "$code" == "200" ]] || { echo "Questões matriculado: $code"; exit 1; }
+          jq -e '.attemptsUsed == 0 and .passed == false and
+            ([.. | objects | keys[] | select(. == "correct" or . == "isCorrect")] | length)==0' \
+            /tmp/quiz-student.json >/dev/null
+          QUESTION_ID=$(jq -r '.questions[0].id' /tmp/quiz-student.json)
+          CORRECT_ID=$(jq -r '.questions[0].options[0].id' /tmp/quiz-student.json)
+          INCORRECT_ID=$(jq -r '.questions[0].options[1].id' /tmp/quiz-student.json)
+
+          code=$(curl -sS -o /tmp/quiz-early.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+            -d "{\"answers\":[{\"questionId\":\"$QUESTION_ID\",\"optionId\":\"$CORRECT_ID\"}]}" \
+            "$EVAL_STUDENT/assessment/$QUIZ_ID/attempts")
+          [[ "$code" == "409" ]] || { echo "Prova antes das aulas: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/certificate-early.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$EVAL_STUDENT/certificate")
+          [[ "$code" == "409" ]] || { echo "Certificado antes de aulas: $code"; exit 1; }
+
+          code=$(curl -sS -o /tmp/eval-complete.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" \
+            "$EVAL_STUDENT/lessons/$EVAL_LESSON/complete")
+          [[ "$code" == "200" ]] || { echo "Concluir aula avaliação: $code"; exit 1; }
+
+          code=$(curl -sS -o /tmp/quiz-wrong.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+            -d "{\"answers\":[{\"questionId\":\"$QUESTION_ID\",\"optionId\":\"$INCORRECT_ID\"}]}" \
+            "$EVAL_STUDENT/assessment/$QUIZ_ID/attempts")
+          [[ "$code" == "200" ]] || { echo "Tentativa incorreta: $code"; cat /tmp/quiz-wrong.json; exit 1; }
+          jq -e '.passed == false and .score == 0 and .number == 1 and .attemptsRemaining == 1' /tmp/quiz-wrong.json >/dev/null
+          code=$(curl -sS -o /tmp/certificate-failed.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$EVAL_STUDENT/certificate")
+          [[ "$code" == "409" ]] || { echo "Certificado sem aprovação: $code"; exit 1; }
+
+          code=$(curl -sS -o /tmp/quiz-pass.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+            -d "{\"answers\":[{\"questionId\":\"$QUESTION_ID\",\"optionId\":\"$CORRECT_ID\"}]}" \
+            "$EVAL_STUDENT/assessment/$QUIZ_ID/attempts")
+          [[ "$code" == "200" ]] || { echo "Tentativa correta: $code"; cat /tmp/quiz-pass.json; exit 1; }
+          jq -e '.passed == true and .score == 100 and .number == 2 and .attemptsRemaining == 0' /tmp/quiz-pass.json >/dev/null
+
+          code=$(curl -sS -o /tmp/quiz-retake.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+            -d "{\"answers\":[{\"questionId\":\"$QUESTION_ID\",\"optionId\":\"$CORRECT_ID\"}]}" \
+            "$EVAL_STUDENT/assessment/$QUIZ_ID/attempts")
+          [[ "$code" == "409" ]] || { echo "Terceira tentativa proibida: $code"; exit 1; }
+
+          code=$(curl -sS -o /tmp/cert-issued.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$EVAL_STUDENT/certificate")
+          [[ "$code" == "200" ]] || { echo "Emitir certificado: $code"; cat /tmp/cert-issued.json; exit 1; }
+          jq -e '.studentName == "Aluno CI" and .courseTitle == "Curso Avaliação CI" and
+            (.verificationCode|length)==36' /tmp/cert-issued.json >/dev/null
+          CERT_CODE=$(jq -r '.verificationCode' /tmp/cert-issued.json)
+
+          code=$(curl -sS -o /tmp/cert-repeat.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$EVAL_STUDENT/certificate")
+          [[ "$code" == "200" ]] || { echo "Emissão idempotente: $code"; exit 1; }
+          jq -e --arg code "$CERT_CODE" '.verificationCode == $code' /tmp/cert-repeat.json >/dev/null
+          code=$(curl -sS -o /tmp/cert-verify.json -w '%{http_code}' \
+            "http://localhost:8080/api/v1/certificates/verify/$CERT_CODE")
+          [[ "$code" == "200" ]] || { echo "Verificação pública: $code"; exit 1; }
+          jq -e --arg code "$CERT_CODE" '.verificationCode == $code' /tmp/cert-verify.json >/dev/null
+          code=$(curl -sS -o /tmp/cert-noauth.json -w '%{http_code}' "$EVAL_STUDENT/certificate")
+          [[ "$code" == "401" ]] || { echo "Certificado privado sem JWT: $code"; exit 1; }
+
+          echo 'Smoke test OK: avaliação 0/100%, tentativas, permissão, certificado idempotente e verificação.'
+
 
   docker-parity-flyway-smoke:
     name: Flyway V1 + V2 demo + V3 media
