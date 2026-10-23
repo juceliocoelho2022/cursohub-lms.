@@ -70,7 +70,7 @@ export function MembershipPlans({onExplore,token}:{onExplore:()=>void;token?:str
       <div className="membership-top">
         <div className="membership-headline">
           <div className="section-topline"><span className="mini-rule"/> CLUBE CURSOHUB</div>
-          <h2 id="membership-heading">Invista no seu futuro. <em>Aprenda sem limites.</em></h2>
+          <h2 id="membership-heading">Invista no seu futuro. <em>Evolua no seu ritmo.</em></h2>
           <p>Escolha o período ideal para evoluir em tecnologia, programação e dados.
             Conteúdo organizado, progresso no seu ritmo e benefícios que crescem com você.</p>
         </div>
