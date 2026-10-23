@@ -796,3 +796,215 @@
 .loyalty-summary small{display:block;font-size:11px;color:var(--course-muted);line-height:1.7}
 .loyalty-emblem{font-size:64px;color:var(--course-accent);flex-shrink:0}
 @media(max-width:550px){.loyalty-summary{padding:19px}.loyalty-emblem{font-size:35px}}
+
+
+/* Home Premium 2.0 — design profissional, responsivo, sem alteração de regras de negócio */
+.site-header{position:relative;z-index:9;background:#080f20}
+.site-header .nav-row{min-height:76px}
+.site-header nav a{transition:color .2s}
+.site-header nav a:focus-visible,.premium-secondary:focus-visible,
+.membership-outline-action:focus-visible,.membership-alert button:focus-visible,
+.premium-skill-grid button:focus-visible{outline:3px solid #9bedbd;outline-offset:3px}
+.premium-hero{
+  position:relative;
+  background:radial-gradient(circle at 78% 28%,#0c3754 0%,#0c1d35 31%,transparent 58%),
+             linear-gradient(130deg,#070e1c 0%,#0a1428 68%,#0b2339 100%);
+}
+.premium-hero:before{
+  content:'';position:absolute;pointer-events:none;top:0;right:0;bottom:0;width:58%;
+  background-image:linear-gradient(#75bdff07 1px,transparent 1px),
+                   linear-gradient(90deg,#75bdff07 1px,transparent 1px);
+  background-size:32px 32px;mask-image:linear-gradient(90deg,transparent,#000);
+}
+.premium-hero .hero-grid{position:relative;max-width:1250px;min-height:575px;grid-template-columns:1.1fr .9fr;gap:40px;padding-top:74px;padding-bottom:87px}
+.premium-hero .hero-copy{position:relative;z-index:1}
+.premium-hero-pill{display:inline-flex;align-items:center;gap:10px;border:1px solid #255d5d;background:#0e3738;
+  color:#a8f8ce;padding:10px 14px;border-radius:100px;letter-spacing:1.15px;font-size:10px;font-weight:800}
+.premium-hero-pill .eyebrow-dot{margin:0;width:6px;height:6px}
+.premium-hero-pill>span:last-child{margin-left:2px;font-size:14px}
+.premium-hero h1{max-width:680px;line-height:1.07;font-size:clamp(44px,5.2vw,70px);letter-spacing:-3.8px;margin:30px 0 24px}
+.premium-hero h1 em{color:#9bedbd}
+.premium-hero .hero-copy>p{max-width:565px;color:#b4c7da;font-size:16px;line-height:1.86}
+.premium-hero .hero-actions{gap:13px;margin-top:32px;flex-wrap:wrap}
+.premium-primary{padding:16px 24px;border-radius:11px;display:inline-flex;align-items:center;gap:18px}
+.premium-primary span{font-size:17px}
+.premium-secondary{border-radius:11px;border:1px solid #4c627b;color:#eaf4ff;background:#ffffff08;
+  padding:15px 22px;font-size:13px;font-weight:800;display:inline-flex;align-items:center;gap:18px}
+.premium-secondary:hover{border-color:#9bedbd;background:#ffffff12}
+.premium-hero-proof{display:flex;gap:18px 23px;align-items:center;flex-wrap:wrap;margin-top:37px}
+.premium-hero-proof>div{font-size:11px;color:#b9cbd8;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.premium-hero-proof>div span{color:#9bedbd;font-weight:900;font-size:13px}
+.premium-art{height:420px;transform:none;display:flex;justify-content:center;align-items:center}
+.premium-art-aura{position:absolute;width:390px;height:390px;right:20px;top:18px;border-radius:50%;
+ background:radial-gradient(circle,#266c9e45 0%,#1a366044 43%,transparent 70%);border:1px solid #2a547030}
+.premium-code-window{position:relative;z-index:1;width:min(100%,435px);transform:rotate(-3deg);
+ border:1px solid #345f79;background:#111d32;border-radius:20px;box-shadow:0 40px 70px #0008,0 0 75px #20b5bd12;overflow:hidden}
+.premium-window-top{height:48px;display:flex;align-items:center;justify-content:space-between;
+ gap:12px;padding:0 17px;background:#142943;border-bottom:1px solid #2a4960;font:10px Consolas,monospace;color:#97aebd}
+.premium-window-top>span:last-child{color:#9bedbd;font-size:9px}
+.premium-dots{display:flex;gap:5px}.premium-dots i{width:9px;height:9px;border-radius:50%;background:#fa775e}
+.premium-dots i:nth-child(2){background:#f8b75a}.premium-dots i:nth-child(3){background:#6cdda6}
+.premium-window-body{padding:27px 27px 23px}
+.premium-code-label{color:#8ecbae;letter-spacing:2px;font-size:9px;font-weight:800}
+.premium-typed-title{font:800 clamp(16px,1.6vw,21px)/1.4 'Plus Jakarta Sans',sans-serif;color:#f5faff;margin:16px 0 22px}
+.premium-typed-title span{display:inline-flex;background:#204663;color:#9bedbd;padding:5px 7px;border-radius:7px;margin-right:8px}
+.premium-code-lines{background:#0a1729;border:1px solid #284260;border-radius:10px;padding:16px 17px}
+.premium-code-lines p{font:12px/1.9 Consolas,monospace;color:#d9e9f8;margin:0}
+.premium-code-lines .indent{padding-left:23px}.code-purple{color:#c7a7fd}.code-blue{color:#89caff}.code-mint{color:#90ebbd}
+.premium-art-footer{display:flex;justify-content:space-between;gap:10px;font:9px/1.5 Consolas,monospace;letter-spacing:.8px;color:#839eac;margin-top:20px}
+.premium-art-footer span:first-child{color:#9bedbd}
+.premium-art-float{position:absolute;z-index:2;display:flex;align-items:center;gap:9px;
+ background:#f5fcff;border:1px solid #ffffff95;color:#153247;border-radius:12px;
+ box-shadow:0 18px 35px #0008;padding:12px 15px;font-size:11px}
+.premium-float-top{top:17px;left:-3px;color:#176d57;font-size:14px}
+.premium-float-top strong{color:#153247;font-size:11px}
+.premium-float-bottom{bottom:5px;right:-7px;display:flex;align-items:start;flex-direction:column;gap:2px}
+.premium-float-bottom small{color:#567184;font-size:10px}
+.premium-art-orbit{position:absolute;right:2px;top:0;color:#9bedbd;font-size:32px}
+
+.premium-skill-strip{background:var(--course-bg);color:var(--course-text);padding:0 0 44px}
+.premium-skill-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;position:relative;margin-top:-30px;z-index:2}
+.premium-skill-grid button{display:flex;align-items:center;text-align:left;gap:15px;padding:19px;
+ border:1px solid var(--course-border);border-radius:15px;background:var(--course-card);
+ color:var(--course-text);box-shadow:0 12px 24px #00000013}
+.premium-skill-grid button:hover{transform:translateY(-3px);border-color:var(--course-accent)}
+.premium-skill-grid button>span:nth-child(2){display:flex;flex-direction:column;gap:4px}
+.premium-skill-grid b{font:800 13px 'Plus Jakarta Sans',sans-serif}
+.premium-skill-grid small{color:var(--course-muted);font-size:11px}
+.premium-skill-grid i{font-style:normal;margin-left:auto;color:var(--course-accent);font-size:18px}
+.premium-skill-icon{display:grid;place-items:center;min-width:47px;height:47px;background:var(--course-soft);
+ color:var(--course-accent);border-radius:11px;font-weight:900;font-size:23px}
+.catalog-section{padding-top:63px}
+
+/* Clube CursoHub — um catálogo comercial sem falso checkout */
+.membership-section{position:relative;padding:90px 0 78px;background:var(--course-bg);color:var(--course-text)}
+.membership-top{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:26px}
+.membership-headline{max-width:740px}
+.membership-headline .section-topline{margin-bottom:20px}
+.membership-headline h2{font:800 clamp(34px,4.8vw,54px)/1.13 'Plus Jakarta Sans',sans-serif;
+ letter-spacing:-2.4px;margin:0 0 20px;color:var(--course-text)}
+.membership-headline h2 em{font-style:normal;color:var(--course-accent)}
+.membership-headline>p{font-size:15px;line-height:1.8;color:var(--course-muted);max-width:660px;margin:0}
+.membership-outline-action{flex:none;display:inline-flex;gap:14px;align-items:center;justify-content:center;
+ background:transparent;color:var(--course-text);border:1px solid var(--course-border);
+ padding:14px 18px;border-radius:11px;font-size:12px;font-weight:800}
+.membership-outline-action:hover{border-color:var(--course-accent);color:var(--course-accent)}
+.membership-value-strip{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:13px;
+ padding:19px 24px;background:var(--course-card);border:1px solid var(--course-border);
+ border-radius:13px;margin-bottom:54px}
+.membership-value-strip>span{font-size:12px;font-weight:700;display:flex;gap:9px;align-items:center}
+.membership-value-strip b{font-size:19px;color:var(--course-accent)}
+.membership-plans-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:25px}
+.membership-plans-heading h3{font:800 27px 'Plus Jakarta Sans',sans-serif;margin:8px 0 7px;letter-spacing:-1px}
+.membership-plans-heading p{font-size:13px;color:var(--course-muted);margin:0}
+.membership-no-charge{font-size:11px;color:var(--course-muted);border:1px solid var(--course-border);
+ border-radius:99px;padding:9px 13px;text-align:center}
+.membership-grid{gap:18px;align-items:stretch}
+.membership-card{position:relative;padding:32px 26px 26px;border-radius:17px;gap:13px;
+ transition:transform .2s,border-color .2s;overflow:hidden}
+.membership-card:hover{transform:translateY(-4px);border-color:var(--course-accent)}
+.membership-featured{border:1.5px solid var(--course-accent);box-shadow:var(--course-shadow),0 0 0 1px var(--course-accent)}
+.membership-featured:before{content:'';position:absolute;top:-75px;right:-65px;width:210px;height:210px;
+ border-radius:50%;background:radial-gradient(circle,var(--course-soft),transparent 70%);pointer-events:none}
+.membership-featured-label{font-size:10px;letter-spacing:.6px;font-weight:900;color:#073b29;
+ background:#9bedbd;padding:9px 14px;border-radius:100px;width:max-content;z-index:1}
+.membership-plan-header{display:flex;align-items:center;gap:12px;z-index:1}
+.membership-icon{height:43px;width:43px;flex:none;display:grid;place-items:center;font-weight:900;
+ font-size:16px;background:var(--course-soft);color:var(--course-accent);border-radius:12px}
+.membership-label{letter-spacing:1.4px;font-size:10px}
+.membership-card h3{font-size:22px;margin-top:6px;z-index:1}
+.membership-price-block{border-bottom:1px solid var(--course-border);padding-bottom:21px;margin-bottom:4px}
+.membership-price{font-size:clamp(27px,2.6vw,35px);letter-spacing:-1.6px}
+.membership-duration{min-height:0;font-size:12px;margin:4px 0}
+.membership-monthly{color:var(--course-muted);font-size:12px;line-height:1.6;margin-top:9px}
+.membership-monthly strong{color:var(--course-text)}
+.membership-saving{display:inline-flex;margin-top:12px;padding:7px 10px;border-radius:7px;
+ background:var(--course-soft);font-size:11px;color:var(--course-accent);font-weight:800}
+.membership-benefit-heading{font-size:12px;font-weight:800;margin-bottom:4px}
+.membership-card ul{gap:13px;margin:0 0 15px}
+.membership-card li{font-size:12px;gap:10px}
+.membership-card li span:first-child{font-size:12px;color:var(--course-accent);font-weight:900}
+.membership-cta{display:flex;align-items:center;justify-content:center;gap:10px;
+ background:var(--course-soft);border-color:var(--course-border);border-radius:9px;opacity:1}
+.membership-cta span{font-size:16px}
+.membership-preview-hint{font-size:10px;color:var(--course-muted);line-height:1.5;margin:0}
+.membership-skeletons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:20px}
+.membership-skeletons div{height:445px;border-radius:17px;border:1px solid var(--course-border);
+ background:linear-gradient(110deg,var(--course-card),var(--course-soft),var(--course-card));
+ background-size:200% 100%;animation:membership-shimmer 1.8s ease-in-out infinite}
+@keyframes membership-shimmer{to{background-position-x:-200%}}
+.membership-alert{display:flex;align-items:center;justify-content:space-between;gap:20px;
+ margin:0 0 21px;padding:17px 20px;border:1px solid var(--course-border);
+ border-left:4px solid #c49c47;background:var(--course-card);border-radius:11px}
+.membership-alert strong{font-size:13px;color:var(--course-text)}
+.membership-alert p{font-size:12px;line-height:1.6;color:var(--course-muted);margin:6px 0 0}
+.membership-alert button{flex:none;border-radius:8px;background:var(--course-soft);
+ color:var(--course-text);border:1px solid var(--course-border);padding:10px 13px;font-size:12px;font-weight:800}
+.membership-alert button:hover{border-color:var(--course-accent)}
+
+.loyalty-premium{position:relative;overflow:hidden;display:grid;grid-template-columns:1.25fr .75fr;gap:34px;
+ padding:42px;background:linear-gradient(115deg,#0d2132 2%,#11373b 65%,#0b2233 100%);
+ color:#effaf8;border:1px solid #386b62;border-radius:22px;margin-top:35px}
+.loyalty-premium-glow{position:absolute;pointer-events:none;right:-70px;top:-120px;width:430px;height:430px;
+ border-radius:50%;background:radial-gradient(circle,#9bedbd28,transparent 67%)}
+.loyalty-premium-copy,.loyalty-progress-card{position:relative;z-index:1}
+.loyalty-premium-overline{font-size:10px;font-weight:900;letter-spacing:1.5px;color:#9bedbd}
+.loyalty-premium h3{font:800 clamp(25px,3vw,38px)/1.21 'Plus Jakarta Sans',sans-serif;
+ letter-spacing:-1.7px;margin:19px 0 18px}
+.loyalty-premium h3 span{color:#9bedbd}
+.loyalty-premium-copy>p{max-width:540px;font-size:13px;line-height:1.8;color:#c4d9dd}
+.loyalty-premium-tiers{display:flex;gap:10px;flex-wrap:wrap;margin:27px 0 21px}
+.loyalty-premium-tiers>span{display:flex;flex-direction:column;gap:3px;padding:11px 18px;
+ border-radius:12px;border:1px solid #42686b;background:#ffffff08;font-size:12px;font-weight:800}
+.loyalty-premium-tiers>span.is-current{background:#9bedbd16;border-color:#9bedbd;color:#a8f8ce}
+.loyalty-premium-tiers i{font-style:normal;font-size:17px;color:#9bedbd}
+.loyalty-premium-tiers small{color:#c2d6db;font-size:10px;font-weight:500}
+.loyalty-premium-disclaimer{color:#bed0d2;font-size:11px;line-height:1.7;display:block}
+.loyalty-progress-card{align-self:center;background:#0b1624be;border:1px solid #5c8b80;
+ padding:27px;border-radius:17px;box-shadow:0 15px 33px #0005}
+.loyalty-progress-icon{display:grid;place-items:center;width:43px;height:43px;color:#0e4e37;
+ background:#9bedbd;font-size:26px;border-radius:12px;margin-bottom:23px}
+.loyalty-progress-label{font-size:9px;letter-spacing:1.7px;color:#8fafb7;font-weight:800}
+.loyalty-progress-card h4{font-size:17px;font-weight:800;margin:8px 0 16px}
+.loyalty-progress-card>strong{display:block;font:900 40px 'Plus Jakarta Sans',sans-serif;letter-spacing:-2px}
+.loyalty-progress-card>strong small{font-size:12px;font-weight:600;color:#c2d6d6;letter-spacing:0}
+.loyalty-progress-track{height:9px;border-radius:20px;background:#304954;margin:20px 0 10px;overflow:hidden}
+.loyalty-progress-track>span{display:block;height:100%;background:linear-gradient(90deg,#5fdba3,#a4f4cb);
+ border-radius:20px;transition:width .25s}
+.loyalty-progress-card p{font-size:11px;line-height:1.6;color:#b9d1d4;margin:12px 0 0}
+.membership-footnote{margin-top:24px;max-width:1100px}
+@media(max-width:1050px){
+ .premium-hero .hero-grid{gap:20px}.premium-art-float{display:none}
+ .membership-value-strip{justify-content:flex-start;gap:20px}
+}
+@media(max-width:900px){
+ .premium-hero .hero-grid{grid-template-columns:1fr 1fr}
+ .premium-art{transform:scale(.84)}
+ .membership-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .membership-featured{grid-column:span 2}
+ .loyalty-premium{grid-template-columns:1fr}
+ .membership-top{align-items:start}
+}
+@media(max-width:700px){
+ .premium-hero .hero-grid{display:block;min-height:auto;padding:70px 24px 92px}
+ .premium-hero h1{font-size:clamp(42px,8vw,58px);letter-spacing:-2.5px}
+ .premium-art{display:none}
+ .premium-skill-grid{grid-template-columns:1fr;gap:10px;margin-top:-40px}
+ .premium-skill-grid button{padding:14px}
+ .membership-section{padding:60px 0}
+ .membership-top{display:flex;flex-direction:column;align-items:flex-start}
+ .membership-value-strip{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+ .membership-plans-heading{flex-direction:column;align-items:flex-start}
+ .membership-grid{grid-template-columns:1fr}.membership-featured{grid-column:auto}
+ .membership-skeletons{grid-template-columns:1fr}.membership-skeletons div{height:160px}
+ .membership-alert{align-items:flex-start;flex-direction:column}
+ .loyalty-premium{padding:26px 20px}
+}
+@media(max-width:500px){
+ .premium-hero .hero-grid{padding-left:17px;padding-right:17px}
+ .premium-hero h1{font-size:42px}
+ .membership-value-strip{grid-template-columns:1fr}
+ .loyalty-premium-tiers>span{flex:1;min-width:81px;padding:10px}
+ .membership-card{padding:26px 22px 21px}
+}
+@media(prefers-reduced-motion:reduce){.membership-skeletons div{animation:none}}
