@@ -9,6 +9,7 @@ export interface Course {
   level: CourseLevel
   estimatedMinutes: number
   thumbnailUrl: string | null
+  priceCents: number
 }
 
 export interface CatalogPage {
@@ -60,3 +61,5 @@ export const levels: Record<CourseLevel, string> = {
   INTERMEDIARIO: 'Intermediário',
   AVANCADO: 'Avançado',
 }
+
+export const money = (cents:number)=> new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(cents/100)
