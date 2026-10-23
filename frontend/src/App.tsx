@@ -69,6 +69,13 @@ export default function App() {
     setView('catalog')
     setScrollTarget('courses')
   }, [])
+  const searchFromHero = useCallback((term: string) => {
+    setSearch(term.trim())
+    setCategory('')
+    setLevel('')
+    setPage(0)
+    scrollToCourses()
+  }, [scrollToCourses])
   const scrollToPlans = useCallback(() => {
     setView('catalog')
     setScrollTarget('plans')
@@ -194,7 +201,7 @@ export default function App() {
             onThemeChange={setCourseTheme}
           />
         : <main id="inicio">
-        <TechEditorial onExplore={scrollToCourses} onPlans={scrollToPlans}
+        <TechEditorial onExplore={scrollToCourses} onPlans={scrollToPlans} onSearch={searchFromHero}
           onCategory={value=>{setCategory(value);setLevel('');setSearch('');scrollToCourses()}}/>
 
         <section className="catalog-section" id="cursos" ref={coursesSection}>
