@@ -21,13 +21,14 @@ export function CourseCard({ course, onView }: CourseCardProps) {
     <article className="course-card">
       <div className={`course-cover cover-${cover.theme} ${coverImage?'course-cover-photo':''}`}>
         {coverImage
-          ? <img src={coverImage} loading="lazy" alt={`Capa do curso ${course.title}`}/>
+          ? <img src={coverImage} loading="lazy" decoding="async" alt={`Capa do curso ${course.title}`}/>
           : <>
               <div className="cover-orbit" />
               <span className="cover-eyebrow">{cover.eyebrow}</span>
               <span className="cover-symbol" aria-hidden="true">{cover.symbol}</span>
               <span className="cover-footnote">CURSOHUB • ACADEMY</span>
             </>}
+        <span className="course-cover-category">{course.category}</span>
       </div>
       <div className="course-content">
         <span className="course-card-learning-tag">CURSO ONLINE · {levels[course.level].toUpperCase()}</span>
