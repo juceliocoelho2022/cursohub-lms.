@@ -101,6 +101,18 @@ jobs:
           jq -e '.role == "STUDENT" and .email == "aluno.ci@example.com" and (.accessToken | length > 32)' /tmp/register.json >/dev/null
           TOKEN=$(jq -r '.accessToken' /tmp/register.json)
 
+          # Fidelidade: novo aluno inicia Bronze, sem cursos/pontos.
+          code=$(curl -sS -o /tmp/loyalty-anonymous.json -w '%{http_code}' \
+            http://localhost:8080/api/v1/students/me/loyalty)
+          [[ "$code" == "401" ]] || { echo "Fidelidade sem token: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/loyalty-zero.json -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" \
+            http://localhost:8080/api/v1/students/me/loyalty)
+          [[ "$code" == "200" ]] || { echo "Fidelidade aluno: $code"; exit 1; }
+          jq -e '.tier == "BRONZE" and .points == 0 and .completedCourses == 0' \
+            /tmp/loyalty-zero.json >/dev/null
+
+
           code=$(curl -sS -o /tmp/me.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
             http://localhost:8080/api/v1/auth/me)
           [[ "$code" == "200" ]] || { echo "GET /auth/me com token: $code (esperado 200)"; exit 1; }
@@ -276,6 +288,38 @@ jobs:
           jq -e '.role == "INSTRUCTOR"' /tmp/instructor-login.json >/dev/null
           INSTRUCTOR_TOKEN=$(jq -r '.accessToken' /tmp/instructor-login.json)
           INSTRUCTOR_URL="http://localhost:8080/api/v1/instructor/courses"
+
+          # Oferta paga é exibida no catálogo, mas não pode ser matriculada sem checkout.
+          code=$(curl -sS -o /tmp/ci-paid.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"slug":"curso-pago-ci","title":"Curso Pago de Teste","description":"Preço apresentado na home, sem cobrança real.","category":"Programação","level":"INICIANTE","estimatedMinutes":45,"priceCents":8990}' \
+            "$INSTRUCTOR_URL")
+          [[ "$code" == "201" ]] || { echo "Criar curso pago: $code"; cat /tmp/ci-paid.json; exit 1; }
+          jq -e '.priceCents == 8990' /tmp/ci-paid.json >/dev/null
+          PAID_ID=$(jq -r '.id' /tmp/ci-paid.json)
+          code=$(curl -sS -o /tmp/ci-paid-module.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Primeiros passos"}' "$INSTRUCTOR_URL/$PAID_ID/modules")
+          [[ "$code" == "201" ]] || { echo "Módulo curso pago: $code"; exit 1; }
+          PAID_MODULE=$(jq -r '.id' /tmp/ci-paid-module.json)
+          code=$(curl -sS -o /tmp/ci-paid-lesson.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Aula de teste","kind":"TEXT","bodyText":"Conteúdo do curso pago para teste seguro.","durationSeconds":45,"required":true}' \
+            "$INSTRUCTOR_URL/$PAID_ID/modules/$PAID_MODULE/lessons")
+          [[ "$code" == "201" ]] || { echo "Aula curso pago: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/ci-paid-published.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" "$INSTRUCTOR_URL/$PAID_ID/publish")
+          [[ "$code" == "200" ]] || { echo "Publicar curso pago: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/ci-paid-catalog.json -w '%{http_code}' \
+            http://localhost:8080/api/v1/courses/curso-pago-ci)
+          [[ "$code" == "200" ]] || { echo "Mostrar preço público: $code"; exit 1; }
+          jq -e '.priceCents == 8990' /tmp/ci-paid-catalog.json >/dev/null
+          code=$(curl -sS -o /tmp/ci-paid-denied.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" \
+            http://localhost:8080/api/v1/courses/curso-pago-ci/enrollments)
+          [[ "$code" == "409" ]] || { echo "Matrícula gratuita indevida em curso pago: $code"; cat /tmp/ci-paid-denied.json; exit 1; }
+          echo 'Preços na home e bloqueio de matrícula paga validados.'
+
 
           code=$(curl -sS -o /tmp/instructor-denied.json -w '%{http_code}' \
             -H "Authorization: Bearer $TOKEN" "$INSTRUCTOR_URL")
