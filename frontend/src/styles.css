@@ -1313,3 +1313,8 @@ a.ch-social-network:focus-visible{outline:2px solid #9bedbd;outline-offset:-4px}
 .course-card:hover .course-cover-photo img { transform: scale(1.035); }
 .course-cover-category { position: absolute; z-index: 2; left: 14px; bottom: 14px; max-width: calc(100% - 28px); padding: 7px 10px; border: 1px solid #ffffff38; border-radius: 7px; background: #0b1a31d9; color: #fff; font-size: 11px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; backdrop-filter: blur(6px); }
 @media (prefers-reduced-motion: reduce) { .course-cover-photo img { transition: none; } .course-card:hover .course-cover-photo img { transform: none; } }
+
+/* Orientação clara na jornada de matrícula, sem alterar checkout ou permissões. */
+.course-enrollment-guide ol { margin: 12px 0 0; padding-left: 20px; display: grid; gap: 9px; }
+.course-enrollment-guide li { color: #42556b; font-size: 13px; line-height: 1.55; padding-left: 4px; }
+.course-enrollment-guide p { margin: 12px 0 0; }
