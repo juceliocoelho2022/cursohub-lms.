@@ -1337,3 +1337,14 @@ a.ch-social-network:focus-visible{outline:2px solid #9bedbd;outline-offset:-4px}
 .dashboard-overview-progress strong { font-size: 38px; line-height: 1; color: #145b49; }
 .dashboard-overview-progress span { font-size: 12px; color: #5d6f82; }
 @media(max-width:680px) { .dashboard-overview { grid-template-columns: 1fr; } }
+
+/* Estúdio do instrutor: indicadores reais do catálogo editorial. */
+.instructor-overview { background: #fff; border: 1px solid #dfe7f0; border-radius: 18px; padding: 24px; margin: 24px 0; }
+.instructor-overview-heading { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+.instructor-overview-heading h2 { margin: 12px 0 0; font-size: clamp(20px, 2.5vw, 28px); }
+.instructor-overview-heading p { margin: 0; color: #64748b; font-size: 13px; }
+.instructor-overview-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+.instructor-overview-stat { display: flex; flex-direction: column; gap: 7px; background: #f4f8fb; padding: 18px; border-radius: 12px; }
+.instructor-overview-stat strong { color: #123f53; font-size: 30px; }
+.instructor-overview-stat span { color: #566b7e; font-size: 12px; }
+@media (max-width: 700px) { .instructor-overview-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
