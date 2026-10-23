@@ -31,8 +31,8 @@ export async function listInstructorAssets(token:string,courseId:string): Promis
   const response=await check(await fetch(`/api/v1/instructor/courses/${courseId}/assets`,{headers:auth(token)}))
   return await response.json() as CourseAsset[]
 }
-export async function listStudentAssets(token:string,slug:string): Promise<CourseAsset[]> {
-  const response=await check(await fetch(`/api/v1/students/me/courses/${encodeURIComponent(slug)}/assets`,{headers:auth(token)}))
+export async function listStudentAssets(token:string,slug:string,signal?:AbortSignal): Promise<CourseAsset[]> {
+  const response=await check(await fetch(`/api/v1/students/me/courses/${encodeURIComponent(slug)}/assets`,{headers:auth(token),signal}))
   return await response.json() as CourseAsset[]
 }
 export async function fetchStudentAsset(token:string,slug:string,id:string): Promise<Blob> {
