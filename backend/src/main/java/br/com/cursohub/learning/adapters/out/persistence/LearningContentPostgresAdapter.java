@@ -76,8 +76,22 @@ public class LearningContentPostgresAdapter implements LearningContentReaderPort
             }
         }, course.enrollmentId(), course.courseId());
 
+        // Never return the body/link of any locked lesson, even if client bypasses UI.
+        boolean blocked = false;
+        Map<UUID,List<Lesson>> guarded = new LinkedHashMap<>();
+        for (ModuleRow module : modules) {
+            List<Lesson> items = new ArrayList<>();
+            for (Lesson original : lessonsByModule.get(module.id())) {
+                items.add(new Lesson(original.id(),original.title(),original.position(),original.kind(),
+                        blocked ? null : original.contentUrl(),
+                        blocked ? null : original.bodyText(),original.durationSeconds(),
+                        original.required(),original.completed(),blocked));
+                if((original.required() || original.kind() == LessonKind.VIDEO) && !original.completed()) blocked=true;
+            }
+            guarded.put(module.id(),items);
+        }
         List<LearningModule> result = modules.stream()
-                .map(m -> new LearningModule(m.id(), m.title(), m.position(), lessonsByModule.get(m.id())))
+                .map(m -> new LearningModule(m.id(), m.title(), m.position(), guarded.get(m.id())))
                 .toList();
         return Optional.of(new LearningCourse(course.courseId(), course.slug(), course.title(), result));
     }

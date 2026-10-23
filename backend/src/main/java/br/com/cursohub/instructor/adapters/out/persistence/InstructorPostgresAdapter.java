@@ -144,6 +144,13 @@ public class InstructorPostgresAdapter implements InstructorStudioPort {
             """, Long.class, courseId);
         if (required == null || required < 1)
             throw new InstructorContentConflictException("Adicione ao menos uma aula obrigatória antes de publicar");
+        Long videoMissing=jdbc.queryForObject("""
+            SELECT COUNT(*) FROM course_modules m JOIN lessons l ON l.module_id=m.id
+            LEFT JOIN course_assets a ON a.lesson_id=l.id
+            WHERE m.course_id=? AND l.kind='VIDEO' AND a.id IS NULL
+            """,Long.class,courseId);
+        if(videoMissing!=null && videoMissing>0)
+            throw new InstructorContentConflictException("Envie o MP4/WEBM de todas as videoaulas antes de publicar");
         jdbc.update("""
             UPDATE courses
                SET status = 'PUBLICADO', published_at = now(), updated_at = now()

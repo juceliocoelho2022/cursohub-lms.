@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { CourseTheme } from '../services/courseTheme'
 import { CourseThemeSelector } from './CourseThemeSelector'
+import { ProtectedVideoPlayer } from './ProtectedVideoPlayer'
+import { CourseDownloadMaterials } from './CourseDownloadMaterials'
+import { listStudentAssets } from '../services/assets'
+import type { CourseAsset } from '../services/assets'
 import { MarkdownLessonContent } from './MarkdownLessonContent'
-import { completeLesson, getCourseLessons, isDirectVideoUrl, safeMaterialUrl } from '../services/learning'
+import { completeLesson, getCourseLessons, safeMaterialUrl } from '../services/learning'
 import type { LearningCourse, LearningLesson } from '../services/learning'
 
 interface Props {
@@ -15,6 +19,8 @@ interface Props {
 
 export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Props) {
   const [course, setCourse] = useState<LearningCourse | null>(null)
+  const [assets,setAssets] = useState<CourseAsset[]>([])
+  const [assetsError,setAssetsError] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -26,6 +32,9 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
     const controller = new AbortController()
     setLoading(true)
     setError('')
+    setAssetsError('')
+    setAssets([])
+    setCourse(null)
     getCourseLessons(slug, token, controller.signal)
       .then(data => {
         setCourse(data)
@@ -36,6 +45,11 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
       })
       .catch(err => { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Erro inesperado') })
       .finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    // Materiais complementares não devem impedir a leitura da aula principal.
+    listStudentAssets(token, slug, controller.signal)
+      .then(data => { if (!controller.signal.aborted) setAssets(data) })
+      .catch(err => { if (!controller.signal.aborted) setAssetsError(
+        err instanceof Error ? err.message : 'Materiais temporariamente indisponíveis') })
     return () => controller.abort()
   }, [slug, token])
 
@@ -88,6 +102,10 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                 <div style={{ width: `${course.progressPercent}%` }}/>
               </div>
             </div>
+            {assetsError && <div className="learning-assets-notice" role="alert">
+              Materiais complementares indisponíveis: {assetsError}. As aulas continuam acessíveis.
+            </div>}
+            <CourseDownloadMaterials token={token} slug={slug} assets={assets} />
             <div className="learning-layout">
               <aside className="learning-sidebar" aria-label="Módulos e aulas do curso">
                 <h2>Conteúdo do curso</h2>
@@ -99,9 +117,11 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                     {module.lessons.map(lesson => (
                       <button type="button" key={lesson.id}
                               aria-current={lesson.id === activeId ? 'true' : undefined}
+                              disabled={lesson.locked}
+                              title={lesson.locked ? 'Conclua a aula anterior para desbloquear' : lesson.title}
                               className={`learning-lesson-nav ${lesson.id === activeId ? 'is-active' : ''}`}
                               onClick={() => { setActiveId(lesson.id); setActionError(''); setFeedback('') }}>
-                        <span aria-hidden="true">{lesson.completed ? '✓' : lesson.kind === 'VIDEO' ? '▶' : lesson.kind === 'PDF' ? '▤' : '◉'}</span>
+                        <span aria-hidden="true">{lesson.locked ? '🔒' : lesson.completed ? '✓' : lesson.kind === 'VIDEO' ? '▶' : lesson.kind === 'PDF' ? '▤' : '◉'}</span>
                         <span>{lesson.title}</span>
                         {lesson.completed && <span className="sr-only">Concluída</span>}
                       </button>
@@ -114,6 +134,7 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                   <div className="learning-no-lesson"><h2>Aulas em preparação</h2><p>O instrutor ainda não disponibilizou conteúdo neste curso.</p></div>
                 ) : (
                   <>
+                    {activeLesson.locked ? <div className="learning-no-lesson" role="status"><h2>Aula bloqueada</h2><p>Conclua a aula obrigatória anterior para avançar.</p></div> : <>
                     <div className="learning-lesson-eyebrow">
                       {activeLesson.kind === 'TEXT' ? 'AULA DE LEITURA' : activeLesson.kind === 'VIDEO' ? 'VIDEOAULA' : 'MATERIAL PDF'}
                       {' · '}
@@ -127,18 +148,14 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                     )}
                     {activeLesson.kind === 'VIDEO' && (
                       <div className="learning-resource">
-                        {material ? (
-                          <>
-                            {isDirectVideoUrl(material) && (
-                              <video key={activeLesson.id} controls preload="metadata" playsInline className="learning-video" src={material}>
-                                Seu navegador não suporta reprodução de vídeo.
-                              </video>
-                            )}
-                            <a href={material} target="_blank" rel="noopener noreferrer" className="learning-resource-link">
-                              Abrir vídeo em nova aba ↗
-                            </a>
-                          </>
-                        ) : <p>O vídeo ainda não está disponível. Consulte o instrutor.</p>}
+                        {assets.find(item=>item.lessonId===activeLesson.id) ? (
+                          <ProtectedVideoPlayer
+                            key={activeLesson.id}
+                            token={token} slug={slug} lessonId={activeLesson.id}
+                            assetId={assets.find(item=>item.lessonId===activeLesson.id)!.id}
+                            onCompleted={async ()=>{setCourse(await getCourseLessons(slug,token))}}
+                          />
+                        ) : <p>O instrutor precisa enviar o MP4/WEBM pelo Estúdio para habilitar a videoaula controlada.</p>}
                       </div>
                     )}
                     {activeLesson.kind === 'PDF' && (
@@ -149,7 +166,9 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                       </div>
                     )}
                     <div className="learning-finish">
-                      {activeLesson.completed
+                      {activeLesson.kind === 'VIDEO' ? (
+                        <p>A conclusão da videoaula é automática após 100% de exibição validada.</p>
+                      ) : activeLesson.completed
                         ? <span className="learning-complete-label">✓ Aula concluída</span>
                         : <button type="button" className="primary-btn" onClick={markAsCompleted} disabled={saving}>
                             {saving ? 'Salvando conclusão...' : 'Marcar aula como concluída ✓'}
@@ -158,6 +177,7 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                       {feedback && <p className="learning-feedback" role="status">{feedback}</p>}
                       {actionError && <p className="inline-error" role="alert">{actionError}</p>}
                     </div>
+                    </>}
                   </>
                 )}
               </section>
