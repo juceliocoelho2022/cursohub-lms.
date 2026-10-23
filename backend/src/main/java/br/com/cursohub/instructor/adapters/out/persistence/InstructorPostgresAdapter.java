@@ -110,9 +110,9 @@ public class InstructorPostgresAdapter implements InstructorStudioPort {
     public InstructorLesson appendLesson(UUID instructorId, UUID courseId, UUID moduleId,
                                          CreateLessonCommand command) {
         assertDraftLocked(instructorId, courseId);
-        Integer moduleCount = jdbc.queryForObject("""
+        Long moduleCount = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM course_modules WHERE id = ? AND course_id = ?
-                """, Integer.class, moduleId);
+                """, Long.class, moduleId);
         if (moduleCount == null || moduleCount == 0) throw new InstructorCourseNotFoundException();
         Integer position = jdbc.queryForObject("""
                 SELECT COALESCE(MAX(position), 0) + 1 FROM lessons WHERE module_id = ?
