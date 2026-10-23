@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { CourseTheme } from '../services/courseTheme'
 import { CourseThemeSelector } from './CourseThemeSelector'
+import { MarkdownLessonContent } from './MarkdownLessonContent'
 import { completeLesson, getCourseLessons, isDirectVideoUrl, safeMaterialUrl } from '../services/learning'
 import type { LearningCourse, LearningLesson } from '../services/learning'
 
@@ -121,7 +122,7 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                     <h2>{activeLesson.title}</h2>
                     {activeLesson.kind === 'TEXT' && (
                       <div className="learning-reading">
-                        {activeLesson.bodyText?.trim() || 'O conteúdo de texto desta aula ainda não foi disponibilizado.'}
+                        <MarkdownLessonContent content={activeLesson.bodyText?.trim() || 'O conteúdo de texto desta aula ainda não foi disponibilizado.'} />
                       </div>
                     )}
                     {activeLesson.kind === 'VIDEO' && (
