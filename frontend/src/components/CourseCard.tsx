@@ -30,6 +30,7 @@ export function CourseCard({ course, onView }: CourseCardProps) {
             </>}
       </div>
       <div className="course-content">
+        <span className="course-card-learning-tag">CURSO ONLINE · {levels[course.level].toUpperCase()}</span>
         <div className="course-meta">
           <span className="course-category">{course.category}</span>
           <span className="meta-dot">·</span>
@@ -40,12 +41,12 @@ export function CourseCard({ course, onView }: CourseCardProps) {
           {course.priceCents===0?'Grátis':money(course.priceCents)}
           {course.priceCents>0 && <small>Venda em preparação</small>}
         </div>
-        <p>{course.description}</p>
+        <p className="course-card-description">{course.description}</p>
         <div className="course-footer">
           <span className="course-duration">◷ &nbsp;{formatDuration(course.estimatedMinutes)}</span>
           <button type="button" className="course-link" onClick={() => onView(course)}
                   aria-label={`Ver detalhes de ${course.title}`}>
-            Explorar curso <span aria-hidden="true">↗</span>
+            Ver detalhes <span aria-hidden="true">↗</span>
           </button>
         </div>
       </div>
