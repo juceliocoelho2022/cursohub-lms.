@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { CourseThemeSelector } from './CourseThemeSelector'
+import type { CourseTheme } from '../services/courseTheme'
 import type { AuthSession } from '../services/auth'
 import type { Course } from '../services/catalog'
 import { formatDuration, levels, loadCourse } from '../services/catalog'
@@ -7,12 +9,14 @@ import { enrollInCourse } from '../services/enrollment'
 interface CourseModalProps {
   course: Course
   session: AuthSession | null
+  theme: CourseTheme
+  onThemeChange: (theme: CourseTheme) => void
   onClose: () => void
   onRequestLogin: () => void
   onEnrolled: () => void
 }
 
-export function CourseModal({ course, session, onClose, onRequestLogin, onEnrolled }: CourseModalProps) {
+export function CourseModal({ course, session, theme, onThemeChange, onClose, onRequestLogin, onEnrolled }: CourseModalProps) {
   const [details, setDetails] = useState<Course>(course)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -65,6 +69,9 @@ export function CourseModal({ course, session, onClose, onRequestLogin, onEnroll
           <span>◈ {details.category}</span>
           <span>◷ {formatDuration(details.estimatedMinutes)}</span>
           <span>◎ {levels[details.level]}</span>
+        </div>
+        <div className="modal-theme-row">
+          <CourseThemeSelector value={theme} onChange={onThemeChange} compact />
         </div>
         <div className="modal-info">
           <strong>Aprenda no seu ritmo</strong>
