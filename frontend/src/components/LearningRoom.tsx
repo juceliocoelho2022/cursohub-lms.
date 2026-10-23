@@ -20,6 +20,7 @@ interface Props {
 export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Props) {
   const [course, setCourse] = useState<LearningCourse | null>(null)
   const [assets,setAssets] = useState<CourseAsset[]>([])
+  const [assetsError,setAssetsError] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -31,9 +32,11 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
     const controller = new AbortController()
     setLoading(true)
     setError('')
-    Promise.all([getCourseLessons(slug, token, controller.signal),listStudentAssets(token,slug)])
-      .then(([data,attachments]) => {
-        setAssets(attachments)
+    setAssetsError('')
+    setAssets([])
+    setCourse(null)
+    getCourseLessons(slug, token, controller.signal)
+      .then(data => {
         setCourse(data)
         setActiveId(id =>
           id && data.modules.some(module => module.lessons.some(lesson => lesson.id === id))
@@ -42,6 +45,11 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
       })
       .catch(err => { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Erro inesperado') })
       .finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    // Materiais complementares não devem impedir a leitura da aula principal.
+    listStudentAssets(token, slug, controller.signal)
+      .then(data => { if (!controller.signal.aborted) setAssets(data) })
+      .catch(err => { if (!controller.signal.aborted) setAssetsError(
+        err instanceof Error ? err.message : 'Materiais temporariamente indisponíveis') })
     return () => controller.abort()
   }, [slug, token])
 
@@ -94,6 +102,9 @@ export function LearningRoom({ slug, token, theme, onThemeChange, onBack }: Prop
                 <div style={{ width: `${course.progressPercent}%` }}/>
               </div>
             </div>
+            {assetsError && <div className="learning-assets-notice" role="alert">
+              Materiais complementares indisponíveis: {assetsError}. As aulas continuam acessíveis.
+            </div>}
             <CourseDownloadMaterials token={token} slug={slug} assets={assets} />
             <div className="learning-layout">
               <aside className="learning-sidebar" aria-label="Módulos e aulas do curso">
