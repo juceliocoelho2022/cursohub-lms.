@@ -1,6 +1,9 @@
+import { useState } from 'react'
+
 interface TechEditorialProps {
   onExplore: () => void
   onPlans: () => void
+  onSearch: (term: string) => void
   onCategory: (value: string) => void
 }
 
@@ -34,7 +37,8 @@ const tracks = [
   },
 ]
 
-export function TechEditorial({onExplore,onPlans,onCategory}:TechEditorialProps) {
+export function TechEditorial({onExplore,onPlans,onCategory,onSearch}:TechEditorialProps) {
+  const [query, setQuery] = useState('')
   return <>
     <section className="ch-fiap-hero" aria-labelledby="ch-hero-heading">
       <div className="ch-hero-mesh" aria-hidden="true"/>
@@ -60,6 +64,12 @@ export function TechEditorial({onExplore,onPlans,onCategory}:TechEditorialProps)
                 CONHECER PLANOS <span aria-hidden="true">→</span>
               </button>
             </div>
+            <form className="ch-hero-search" role="search" onSubmit={event => { event.preventDefault(); onSearch(query) }}>
+              <label className="sr-only" htmlFor="hero-course-search">Buscar cursos</label>
+              <input id="hero-course-search" type="search" maxLength={120} value={query}
+                onChange={event => setQuery(event.target.value)} placeholder="O que você quer aprender? Ex.: Java" />
+              <button type="submit">BUSCAR CURSO <span aria-hidden="true">↗</span></button>
+            </form>
             <div className="ch-hero-highlights">
               <span><i aria-hidden="true"/> Conteúdos no seu ritmo</span>
               <span><i aria-hidden="true"/> Prática e projetos</span>
