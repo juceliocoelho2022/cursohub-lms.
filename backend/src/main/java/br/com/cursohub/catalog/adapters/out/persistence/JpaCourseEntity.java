@@ -40,6 +40,8 @@ public class JpaCourseEntity {
     private String thumbnailUrl;
     @Column(name = "price_cents",nullable=false)
     private int priceCents;
+    @Column(name = "price_cents", nullable = false)
+    private int priceCents;
     @Column(name = "published_at")
     private Instant publishedAt;
     @Column(name = "created_at", nullable = false)
