@@ -3,6 +3,7 @@ import { CourseCard } from './components/CourseCard'
 import { CourseModal } from './components/CourseModal'
 import { MembershipPlans } from './components/MembershipPlans'
 import { TechEditorial } from './components/TechEditorial'
+import { SocialHub } from './components/SocialHub'
 import { CourseThemeSelector } from './components/CourseThemeSelector'
 import { loadCourseTheme, saveCourseTheme } from './services/courseTheme'
 import type { CourseTheme } from './services/courseTheme'
@@ -14,7 +15,7 @@ import type { AuthMode } from './components/AuthDialog'
 import { currentUser } from './services/auth'
 import type { AuthSession, CurrentUser } from './services/auth'
 import type { CatalogPage, Course } from './services/catalog'
-import { loadCourses } from './services/catalog'
+import { loadCourse, loadCourses } from './services/catalog'
 import './styles.css'
 
 const categories = ['Programação', 'Dados', 'Matemática']
@@ -82,6 +83,18 @@ export default function App() {
     destination?.scrollIntoView({ behavior: 'smooth' })
     setScrollTarget(null)
   }, [view, scrollTarget])
+  // Links compartilhados usam ?curso=slug: abrem o curso certo, inclusive após F5.
+  useEffect(() => {
+    const params=new URLSearchParams(window.location.search)
+    const slug=params.get('curso')
+    if(!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length>160)return
+    const controller=new AbortController()
+    void loadCourse(slug,controller.signal)
+      .then(result=>{if(!controller.signal.aborted){setView('catalog');setSelectedCourse(result)}})
+      .catch(()=>{ /* Link inválido ou curso não publicado: manter catálogo normal. */ })
+    return ()=>controller.abort()
+  }, [])
+
   const closeModal = useCallback(() => setSelectedCourse(null), [])
   const resetFilters = () => { setSearch(''); setCategory(''); setLevel(''); setPage(0) }
   const closeAuth = useCallback(() => setAuthMode(null), [])
@@ -249,8 +262,9 @@ export default function App() {
         <section className="about-section" id="sobre">
           <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>Conhecimento aplicado em uma experiência que acompanha cada etapa do aprendizado: explore cursos, acompanhe aulas, registre sua evolução e descubra novos caminhos para seguir estudando.</p></div>
         </section>
+        <SocialHub/>
       </main>}
-      <footer><div className="container footer-row"><span className="brand">✳ Curso<span>Hub</span><b>.</b></span><span>© {new Date().getFullYear()} CursoHub · Versão inicial de desenvolvimento</span></div></footer>
+      <footer><div className="container footer-row"><span className="brand">✳ Curso<span>Hub</span><b>.</b></span><div className="ch-footer-meta"><a href="#redes-sociais" onClick={event=>{event.preventDefault();setView('catalog');window.setTimeout(()=>document.getElementById('redes-sociais')?.scrollIntoView({behavior:'smooth'}),30)}}>Redes sociais ↗</a><span>© {new Date().getFullYear()} CursoHub · Versão inicial de desenvolvimento</span></div></div></footer>
       {selectedCourse && <CourseModal
         key={selectedCourse.slug}
         course={selectedCourse}
