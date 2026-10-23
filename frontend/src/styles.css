@@ -775,3 +775,24 @@
   .membership-featured{grid-column:span 2}.membership-intro{align-items:start;flex-direction:column}}
 @media(max-width:600px){.membership-section{padding:55px 0}.membership-grid{grid-template-columns:1fr}
   .membership-featured{grid-column:auto}.membership-card{padding:22px 18px}}
+
+/* Preços individuais e pontos de fidelidade — Etapa Comercial */
+.course-price{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:21px;font-weight:900;
+  color:var(--course-text);margin:6px 0 10px;font-family:'Plus Jakarta Sans',sans-serif}
+.course-price-free{color:#16875d}
+.course-price small{color:var(--course-muted);font-size:10px;line-height:1.5;font-weight:600}
+.modal-course-price{font:900 23px 'Plus Jakarta Sans',sans-serif;color:var(--course-text);
+  padding:10px 0 0}
+.modal-course-price small{display:block;font:500 12px/1.5 'Inter',sans-serif;color:var(--course-muted);margin:5px 0}
+.modal-paid-notice{font-size:13px;line-height:1.6;color:var(--course-text);
+  border:1px solid var(--course-border);background:var(--course-soft);border-radius:10px;padding:15px}
+.instructor-course-price{display:inline-block;margin:9px 0;color:var(--course-accent);font-size:14px}
+.pricing-field-hint{display:block;color:var(--course-muted);font-size:11px;line-height:1.6;margin-top:6px}
+.loyalty-summary{display:flex;align-items:center;justify-content:space-between;gap:24px;
+  border:1px solid var(--course-border);background:var(--course-card);border-radius:17px;
+  padding:28px;margin:25px 0 30px}
+.loyalty-summary h3{margin:10px 0;font-size:23px;line-height:1.3;color:var(--course-text)}
+.loyalty-summary p{font-size:13px;color:var(--course-muted)}
+.loyalty-summary small{display:block;font-size:11px;color:var(--course-muted);line-height:1.7}
+.loyalty-emblem{font-size:64px;color:var(--course-accent);flex-shrink:0}
+@media(max-width:550px){.loyalty-summary{padding:19px}.loyalty-emblem{font-size:35px}}
