@@ -19,7 +19,8 @@ public class MembershipPlanPostgresAdapter implements MembershipPlanReaderPort {
             SELECT code,title,duration_months,price_cents,course_limit,discount_percent,benefits
             FROM membership_plans WHERE active=TRUE ORDER BY sort_order
             """,(rs,i)->{
-                Integer limit=rs.getObject("course_limit",Integer.class);
+                int rawLimit=rs.getInt("course_limit");
+                Integer limit=rs.wasNull()?null:rawLimit;
                 String[] perks=(String[])rs.getArray("benefits").getArray();
                 return new MembershipPlan(
                     rs.getString("code"),rs.getString("title"),
