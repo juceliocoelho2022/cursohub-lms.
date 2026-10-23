@@ -47,9 +47,9 @@ public class EnrollmentPostgresAdapter implements EnrollmentWriterPort {
         if (!inserted.isEmpty()) return inserted.getFirst();
 
         // Curso removido, arquivado ou ainda em rascunho nunca aceita matrícula nova.
-        Integer published = jdbc.queryForObject("""
+        Long published = jdbc.queryForObject("""
                 SELECT count(*) FROM courses WHERE slug = ? AND status = 'PUBLICADO'
-                """, Integer.class, courseSlug);
+                """, Long.class, courseSlug);
         if (published == null || published == 0) throw new CourseUnavailableException();
 
         List<EnrollmentReceipt> previous = jdbc.query(FIND_EXISTING,
