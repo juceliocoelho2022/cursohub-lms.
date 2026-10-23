@@ -40,10 +40,12 @@ public final class InstructorStudioService implements InstructorStudioUseCase {
         String title = required(command.title(), 5, 180, "Título");
         String description = required(command.description(), 10, 20000, "Descrição");
         String category = required(command.category(), 2, 60, "Categoria");
+        if (command.priceCents() < 0 || command.priceCents() > 2000000)
+            throw new InvalidInstructorContentException("Preço deve ficar entre R$ 0,00 e R$ 20.000,00");
         if (command.estimatedMinutes() < 0 || command.estimatedMinutes() > 100000)
             throw new InvalidInstructorContentException("Duração estimada inválida");
         return store.createDraft(instructorId, new CreateCourseCommand(
-                command.slug(), title, description, category, command.level(), command.estimatedMinutes()));
+                command.slug(), title, description, category, command.level(), command.estimatedMinutes(),command.priceCents()));
     }
 
     @Override
