@@ -45,6 +45,8 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/api/v1/students/me/courses/*/lessons").hasRole("STUDENT")
                 .requestMatchers(HttpMethod.POST, "/api/v1/students/me/courses/*/lessons/*/complete").hasRole("STUDENT")
                 .requestMatchers(HttpMethod.POST, "/api/v1/courses/*/enrollments").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.GET, "/api/v1/students/me/courses/*/assets", "/api/v1/students/me/courses/*/assets/*").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.POST, "/api/v1/students/me/courses/*/lessons/*/video-progress").hasRole("STUDENT")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
         return http.build();
