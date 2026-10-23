@@ -298,6 +298,32 @@ jobs:
             "$INSTRUCTOR_URL/$OWN_COURSE_ID/modules/$MODULE_ID/lessons")
           [[ "$code" == "201" ]] || { echo "Criar aula: $code"; cat /tmp/new-lesson.json; tail -420 /tmp/cursohub-integration.log; exit 1; }
 
+          # Etapa 7: duas aulas posteriores + vídeo binário real de assinatura MP4
+          code=$(curl -sS -o /tmp/ci-video-lesson.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Vídeo obrigatório","kind":"VIDEO","durationSeconds":2,"required":true}' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/modules/$MODULE_ID/lessons")
+          [[ "$code" == "201" ]] || { echo "Criar aula VIDEO: $code"; exit 1; }
+          VIDEO_ID=$(jq -r '.id' /tmp/ci-video-lesson.json)
+          code=$(curl -sS -o /tmp/ci-after-video.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"Aula depois do vídeo","kind":"TEXT","bodyText":"Conteúdo só liberado depois dos cem por cento","durationSeconds":50,"required":true}' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/modules/$MODULE_ID/lessons")
+          [[ "$code" == "201" ]] || { echo "Criar terceira aula: $code"; exit 1; }
+          printf '\\x00\\x00\\x00\\x18ftypisom' > /tmp/ci-video.mp4
+          code=$(curl -sS -o /tmp/ci-asset-video.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -F 'file=@/tmp/ci-video.mp4;type=video/mp4' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/assets?lessonId=$VIDEO_ID")
+          [[ "$code" == "201" ]] || { echo "Upload vídeo: $code"; cat /tmp/ci-asset-video.json; exit 1; }
+          printf '%%PDF-1.7\\nMaterial de curso' > /tmp/ci-material.pdf
+          code=$(curl -sS -o /tmp/ci-asset-pdf.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
+            -F 'file=@/tmp/ci-material.pdf;type=application/pdf' \
+            "$INSTRUCTOR_URL/$OWN_COURSE_ID/assets")
+          [[ "$code" == "201" ]] || { echo "Upload PDF: $code"; cat /tmp/ci-asset-pdf.json; exit 1; }
+          PDF_ASSET_ID=$(jq -r '.id' /tmp/ci-asset-pdf.json)
+
           code=$(curl -sS -o /tmp/published-course.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $INSTRUCTOR_TOKEN" \
             "$INSTRUCTOR_URL/$OWN_COURSE_ID/publish")
@@ -334,6 +360,54 @@ jobs:
           [[ "$code" == "404" ]] || { echo "Isolamento entre instrutores: $code (esperado 404)"; exit 1; }
 
           echo 'Smoke test OK: instrutor, rascunho, modulos, aulas, publicacao e isolamento.'
+          # Inscrição em curso real e desbloqueio sequencial sem permitir skips.
+          code=$(curl -sS -o /tmp/enroll-instructor-course.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" \
+            "http://localhost:8080/api/v1/courses/curso-publicado-instrutor-ci/enrollments")
+          [[ "$code" == "201" ]] || { echo "Aluno matricula curso novo: $code"; exit 1; }
+          LESSONS_CI="http://localhost:8080/api/v1/students/me/courses/curso-publicado-instrutor-ci/lessons"
+          code=$(curl -sS -o /tmp/ci-locked.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$LESSONS_CI")
+          [[ "$code" == "200" ]] || { echo "Lições novo curso: $code"; exit 1; }
+          jq -e '.modules[0].lessons | length == 3 and .[0].locked == false and .[1].locked == true and .[2].locked == true' /tmp/ci-locked.json >/dev/null
+          code=$(curl -sS -o /tmp/ci-forbidden-manual.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$LESSONS_CI/$VIDEO_ID/complete")
+          [[ "$code" == "404" ]] || { echo "Conclusão manual VIDEO: $code (esperado 404)"; exit 1; }
+          code=$(curl -sS -o /tmp/ci-forbidden-next.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" \
+            "$LESSONS_CI/$(jq -r '.id' /tmp/ci-after-video.json)/complete")
+          [[ "$code" == "404" ]] || { echo "Pular aula obrigatória: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/ci-complete-first.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" \
+            "$LESSONS_CI/$(jq -r '.id' /tmp/new-lesson.json)/complete")
+          [[ "$code" == "200" ]] || { echo "Conclusão TEXT inicial: $code"; exit 1; }
+          VIDEO_URL="$LESSONS_CI/$VIDEO_ID/video-progress"
+          code=$(curl -sS -o /tmp/ci-watch0.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+            -d '{"seconds":0}' "$VIDEO_URL")
+          [[ "$code" == "200" ]] || { echo "Inicialização progresso vídeo: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/ci-jump.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+            -d '{"seconds":2}' "$VIDEO_URL")
+          [[ "$code" == "200" ]] || { echo "Teste pulo vídeo: $code"; exit 1; }
+          jq -e '.completed == false and .watchedSeconds == 0' /tmp/ci-jump.json >/dev/null
+          sleep 3
+          code=$(curl -sS -o /tmp/ci-watch2.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+            -d '{"seconds":2}' "$VIDEO_URL")
+          [[ "$code" == "200" ]] || { echo "Registrar vídeo completo: $code"; exit 1; }
+          jq -e '.completed == true and .percent == 100' /tmp/ci-watch2.json >/dev/null
+          code=$(curl -sS -o /tmp/ci-unlocked.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$LESSONS_CI")
+          [[ "$code" == "200" ]] || { echo "Lições após assistir vídeo: $code"; exit 1; }
+          jq -e '.modules[0].lessons[2].locked == false' /tmp/ci-unlocked.json >/dev/null
+          code=$(curl -sS -o /tmp/ci-pdf-downloaded -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" \
+            "http://localhost:8080/api/v1/students/me/courses/curso-publicado-instrutor-ci/assets/$PDF_ASSET_ID")
+          [[ "$code" == "200" ]] || { echo "Baixar PDF matriculado: $code"; exit 1; }
+          code=$(curl -sS -o /tmp/ci-pdf-no-auth -w '%{http_code}' \
+            "http://localhost:8080/api/v1/students/me/courses/curso-publicado-instrutor-ci/assets/$PDF_ASSET_ID")
+          [[ "$code" == "401" ]] || { echo "PDF sem JWT: $code"; exit 1; }
+          echo 'Smoke test OK: anexos autenticados, liberação sequencial e vídeo completo 100%.'
+
 
 
 
