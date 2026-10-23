@@ -75,7 +75,7 @@ export function CourseModal({ course, session, onClose, onRequestLogin, onEnroll
         {!session ? (
           <button type="button" className="primary-btn full" onClick={onRequestLogin}>Entre para se matricular ↗</button>
         ) : session.role === 'STUDENT' ? (
-          <button type="button" className="primary-btn full" onClick={handleEnrollment} disabled={busy || !!error}>
+          <button type="button" className="primary-btn full" onClick={handleEnrollment} disabled={busy}>
             {busy ? 'Realizando matrícula...' : 'Matricular-se gratuitamente ↗'}
           </button>
         ) : (
