@@ -2,6 +2,7 @@ package br.com.cursohub.shared.api;
 
 import br.com.cursohub.catalog.application.exception.CourseNotFoundException;
 import br.com.cursohub.catalog.application.exception.InvalidCatalogFilterException;
+import br.com.cursohub.identity.application.exception.*;
 import java.time.Instant;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,26 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class ApiErrorHandler {
+    @ExceptionHandler({DuplicateEmailException.class})
+    ResponseEntity<Map<String, Object>> handleDuplicate(DuplicateEmailException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body(ex.getMessage()));
+    }
+
+    @ExceptionHandler({InvalidCredentialsException.class})
+    ResponseEntity<Map<String, Object>> handleBadLogin(InvalidCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body(ex.getMessage()));
+    }
+
+    @ExceptionHandler({InvalidRegistrationException.class})
+    ResponseEntity<Map<String, Object>> handleBadRegister(InvalidRegistrationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(ex.getMessage()));
+    }
+
+    @ExceptionHandler({AccountUnavailableException.class})
+    ResponseEntity<Map<String, Object>> handleAccountUnavailable(AccountUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body(ex.getMessage()));
+    }
+
     @ExceptionHandler(CourseNotFoundException.class)
     ResponseEntity<Map<String, Object>> handleNotFound(CourseNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body(ex.getMessage()));
