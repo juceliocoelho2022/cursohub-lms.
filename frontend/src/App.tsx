@@ -266,7 +266,7 @@ export default function App() {
           </div>
         </section>
 
-        <MembershipPlans onExplore={scrollToCourses}/>
+        <MembershipPlans onExplore={scrollToCourses} token={session?.role==='STUDENT'?session.accessToken:undefined}/>
 
         <section className="about-section" id="sobre">
           <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>O CursoHub conecta catálogo, autenticação e matrículas ao banco de dados. Aulas, avaliações e certificados serão disponibilizados nas próximas etapas.</p></div>
