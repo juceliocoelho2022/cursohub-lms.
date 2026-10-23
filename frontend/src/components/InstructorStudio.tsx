@@ -127,6 +127,13 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
     })
   }
 
+  const courseSummary = {
+    total: courses.length,
+    published: courses.filter(course => course.status === 'PUBLICADO').length,
+    drafts: courses.filter(course => course.status === 'RASCUNHO').length,
+    archived: courses.filter(course => course.status === 'ARQUIVADO').length,
+  }
+
   const editable = content?.course.status === 'RASCUNHO'
 
   return (
@@ -143,6 +150,31 @@ export function InstructorStudio({ token, name, theme, onThemeChange }: Props) {
 
         {error && <p className="instructor-message instructor-error" role="alert">{error}</p>}
         {notice && <p className="instructor-message instructor-success" role="status">{notice}</p>}
+
+        {!loading && !error && (
+          <section className="instructor-overview" aria-labelledby="instructor-overview-title">
+            <div className="instructor-overview-heading">
+              <div>
+                <div className="section-topline"><span className="mini-rule"/> VISÃO EDITORIAL</div>
+                <h2 id="instructor-overview-title">Seus cursos em números</h2>
+              </div>
+              <p>Resumo de publicação dos cursos sob sua responsabilidade.</p>
+            </div>
+            <div className="instructor-overview-grid">
+              {[
+                { label: 'Total de cursos', value: courseSummary.total },
+                { label: 'Publicados', value: courseSummary.published },
+                { label: 'Rascunhos', value: courseSummary.drafts },
+                { label: 'Arquivados', value: courseSummary.archived },
+              ].map(item => (
+                <div className="instructor-overview-stat" key={item.label}>
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="instructor-grid">
           <section className="instructor-panel">
