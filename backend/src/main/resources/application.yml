@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: cursohub-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/cursohub}
+    username: ${DB_USER:cursohub}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
+server:
+  port: ${PORT:8080}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
