@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { CourseThemeSelector } from './CourseThemeSelector'
+import type { CourseTheme } from '../services/courseTheme'
 import type { DashboardData } from '../services/dashboard'
 import { getStudentDashboard } from '../services/dashboard'
 
@@ -7,9 +9,11 @@ interface Props {
   name: string
   onExplore: () => void
   onLogout: () => void
+  theme: CourseTheme
+  onThemeChange: (theme: CourseTheme) => void
 }
 
-export function StudentDashboard({ token, name, onExplore, onLogout }: Props) {
+export function StudentDashboard({ token, name, onExplore, onLogout, theme, onThemeChange }: Props) {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -37,7 +41,10 @@ export function StudentDashboard({ token, name, onExplore, onLogout }: Props) {
             <h1>Olá, {name.split(' ')[0]}<span className="dashboard-sparkle">✳</span></h1>
             <p>Acompanhe seus cursos e continue aprendendo no seu ritmo.</p>
           </div>
-          <button className="primary-btn" type="button" onClick={onExplore}>Explorar cursos ↗</button>
+          <div className="dashboard-actions">
+            <CourseThemeSelector value={theme} onChange={onThemeChange} />
+            <button className="primary-btn" type="button" onClick={onExplore}>Explorar cursos ↗</button>
+          </div>
         </div>
 
         {loading ? (
@@ -81,7 +88,7 @@ export function StudentDashboard({ token, name, onExplore, onLogout }: Props) {
                 <h3>Sua jornada começa aqui.</h3>
                 <p>Você ainda não possui matrículas ativas ou concluídas. Explore os cursos disponíveis e encontre seu próximo desafio.</p>
                 <button className="primary-btn" type="button" onClick={onExplore}>Conhecer o catálogo ↗</button>
-                <span>Em breve, você poderá se matricular diretamente na plataforma.</span>
+                <span>Você já pode se matricular nos cursos disponíveis no catálogo.</span>
               </div>
             ) : (
               <div className="dashboard-course-grid">

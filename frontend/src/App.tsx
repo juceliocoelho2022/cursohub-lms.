@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CourseCard } from './components/CourseCard'
 import { CourseModal } from './components/CourseModal'
+import { CourseThemeSelector } from './components/CourseThemeSelector'
+import { loadCourseTheme, saveCourseTheme } from './services/courseTheme'
+import type { CourseTheme } from './services/courseTheme'
 import { AuthDialog } from './components/AuthDialog'
 import { StudentDashboard } from './components/StudentDashboard'
 import type { AuthMode } from './components/AuthDialog'
@@ -14,6 +17,7 @@ const categories = ['Programação', 'Dados', 'Matemática']
 const PAGE_SIZE = 6
 
 export default function App() {
+  const [courseTheme, setCourseTheme] = useState<CourseTheme>(loadCourseTheme)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [category, setCategory] = useState('')
@@ -30,6 +34,8 @@ export default function App() {
   const [currentProfile, setCurrentProfile] = useState<CurrentUser | null>(null)
   const [view, setView] = useState<'catalog' | 'dashboard'>('catalog')
   const [scrollTarget, setScrollTarget] = useState<'courses' | 'about' | null>(null)
+
+  useEffect(() => saveCourseTheme(courseTheme), [courseTheme])
 
   useEffect(() => {
     const handle = window.setTimeout(() => setDebouncedSearch(search.trim()), 300)
@@ -91,7 +97,7 @@ export default function App() {
   }, [session, logout])
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-course-theme={courseTheme}>
       <header className="site-header">
         <div className="container nav-row">
           <a className="brand" href="#inicio" aria-label="CursoHub — início" onClick={() => setView("catalog")}>
@@ -128,6 +134,8 @@ export default function App() {
             name={currentProfile?.name || session.name}
             onExplore={scrollToCourses}
             onLogout={logout}
+            theme={courseTheme}
+            onThemeChange={setCourseTheme}
           />
         : <main id="inicio">
         <section className="hero">
@@ -170,6 +178,10 @@ export default function App() {
                 <p>Encontre conteúdos alinhados com seus objetivos e interesses.</p>
               </div>
               <span className="course-total">{catalog ? `${catalog.totalElements} curso${catalog.totalElements === 1 ? '' : 's'} disponível${catalog.totalElements === 1 ? '' : 'eis'}` : 'Carregando catálogo...'}</span>
+            </div>
+
+            <div className="catalog-theme-row">
+              <CourseThemeSelector value={courseTheme} onChange={setCourseTheme} />
             </div>
 
             <div className="filters">
@@ -219,11 +231,24 @@ export default function App() {
         </section>
 
         <section className="about-section" id="sobre">
-          <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>O CursoHub começa com um catálogo conectado à API e ao banco de dados. Nas próximas versões, teremos matrículas, aulas, avaliações, acompanhamento de progresso e certificados.</p></div>
+          <div className="container about-row"><div><div className="section-topline light"><span className="mini-rule" /> FEITO PARA EVOLUIR</div><h2>Aprender é construir <em>novos caminhos.</em></h2></div><p>O CursoHub conecta catálogo, autenticação e matrículas ao banco de dados. Aulas, avaliações e certificados serão disponibilizados nas próximas etapas.</p></div>
         </section>
       </main>}
       <footer><div className="container footer-row"><span className="brand">✳ Curso<span>Hub</span><b>.</b></span><span>© {new Date().getFullYear()} CursoHub · Versão inicial de desenvolvimento</span></div></footer>
-      {selectedCourse && <CourseModal course={selectedCourse} onClose={closeModal} />}
+      {selectedCourse && <CourseModal
+        key={selectedCourse.slug}
+        course={selectedCourse}
+        session={session}
+        theme={courseTheme}
+        onThemeChange={setCourseTheme}
+        onClose={closeModal}
+        onRequestLogin={() => { setSelectedCourse(null); setAuthMode('login') }}
+        onEnrolled={() => {
+          setSelectedCourse(null)
+          setView('dashboard')
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }}
+      />}
       {authMode && <AuthDialog initialMode={authMode} onClose={closeAuth} onAuthenticated={onAuthenticated} />}
     </div>
   )

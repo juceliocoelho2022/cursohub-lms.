@@ -155,5 +155,48 @@ jobs:
           [[ "$code" == "200" ]] || { echo "Segundo dashboard: $code"; exit 1; }
           jq -e '.enrolledCourses == 0 and (.courses | length) == 0' /tmp/dashboard-other.json >/dev/null
 
-          echo 'Smoke test OK: API, PostgreSQL, JWT, matrículas e isolamento por aluno.'
+          # Matricula real: exige JWT de STUDENT e curso publicado.
+          ENROLL_URL="http://localhost:8080/api/v1/courses/curso-teste-dashboard/enrollments"
+          code=$(curl -sS -o /tmp/enrollment-unauth.json -w '%{http_code}' -X POST "$ENROLL_URL")
+          [[ "$code" == "401" ]] || { echo "Matricula sem JWT: $code (esperado 401)"; exit 1; }
+
+          code=$(curl -sS -o /tmp/enrollment-existing.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$ENROLL_URL")
+          [[ "$code" == "200" ]] || { echo "Matricula existente: $code (esperado 200)"; cat /tmp/enrollment-existing.json; exit 1; }
+          jq -e '.created == false and .status == "ACTIVE"' /tmp/enrollment-existing.json >/dev/null
+
+          code=$(curl -sS -o /tmp/enrollment-new.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $SECOND_TOKEN" "$ENROLL_URL")
+          [[ "$code" == "201" ]] || { echo "Nova matricula: $code (esperado 201)"; cat /tmp/enrollment-new.json; exit 1; }
+          jq -e '.created == true and .status == "ACTIVE" and (.enrollmentId | length > 30)' /tmp/enrollment-new.json >/dev/null
+
+          code=$(curl -sS -o /tmp/enrollment-repeat.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $SECOND_TOKEN" "$ENROLL_URL")
+          [[ "$code" == "200" ]] || { echo "Matricula repetida: $code (esperado 200)"; exit 1; }
+          jq -e --slurpfile first /tmp/enrollment-new.json \
+            '.created == false and .enrollmentId == $first[0].enrollmentId' /tmp/enrollment-repeat.json >/dev/null
+
+          code=$(curl -sS -o /tmp/second-dashboard.json -w '%{http_code}' \
+            -H "Authorization: Bearer $SECOND_TOKEN" http://localhost:8080/api/v1/students/me/dashboard)
+          [[ "$code" == "200" ]] || { echo "Dashboard atualizado: $code"; exit 1; }
+          jq -e '.enrolledCourses == 1 and (.courses | length) == 1 and .courses[0].progressPercent == 0' /tmp/second-dashboard.json >/dev/null
+
+          # Testa restricoes adicionais no banco temporario do CI.
+          ENROLLMENT_ID=$(jq -r '.enrollmentId' /tmp/enrollment-new.json)
+          docker exec -i "$POSTGRES_CONTAINER" psql -X -U cursohub -d cursohub_ci -v ON_ERROR_STOP=1 <<SQL
+          UPDATE enrollments SET status = 'CANCELLED' WHERE id = '$ENROLLMENT_ID';
+          SQL
+          code=$(curl -sS -o /tmp/enrollment-cancelled.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $SECOND_TOKEN" "$ENROLL_URL")
+          [[ "$code" == "409" ]] || { echo "Matricula cancelada: $code (esperado 409)"; exit 1; }
+
+          docker exec -i "$POSTGRES_CONTAINER" psql -X -U cursohub -d cursohub_ci -v ON_ERROR_STOP=1 <<SQL
+          UPDATE courses SET status = 'ARQUIVADO' WHERE slug = 'curso-teste-dashboard';
+          SQL
+          code=$(curl -sS -o /tmp/enrollment-archived.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $TOKEN" "$ENROLL_URL")
+          [[ "$code" == "404" ]] || { echo "Curso arquivado: $code (esperado 404)"; exit 1; }
+
+          echo 'Smoke test OK: JWT, catalogo, dashboard, matricula idempotente, cancelamento e curso arquivado.'
+
 
