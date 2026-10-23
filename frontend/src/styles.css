@@ -1318,3 +1318,13 @@ a.ch-social-network:focus-visible{outline:2px solid #9bedbd;outline-offset:-4px}
 .course-enrollment-guide ol { margin: 12px 0 0; padding-left: 20px; display: grid; gap: 9px; }
 .course-enrollment-guide li { color: #42556b; font-size: 13px; line-height: 1.55; padding-left: 4px; }
 .course-enrollment-guide p { margin: 12px 0 0; }
+
+/* Painel do aluno: próximo curso real, calculado a partir das matrículas da API. */
+.dashboard-continue { display: flex; align-items: center; justify-content: space-between; gap: 28px; margin: 28px 0 36px; padding: clamp(20px, 3vw, 32px); border-radius: 18px; background: #10243d; color: #fff; }
+.dashboard-continue > div { flex: 1; min-width: 0; }
+.dashboard-continue-eyebrow { display: block; margin-bottom: 10px; color: #a9e7c1; font-size: 11px; font-weight: 800; letter-spacing: .1em; }
+.dashboard-continue h2 { margin: 0 0 9px; font-size: clamp(20px, 2.5vw, 29px); line-height: 1.2; }
+.dashboard-continue p { margin: 0 0 16px; color: #d2deed; font-size: 13px; }
+.dashboard-continue .dashboard-progress-track { max-width: 520px; background: #ffffff30; }
+.dashboard-continue .primary-btn { flex-shrink: 0; }
+@media (max-width: 640px) { .dashboard-continue { flex-direction: column; align-items: stretch; } .dashboard-continue .primary-btn { width: 100%; } }

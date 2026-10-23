@@ -32,6 +32,8 @@ export function StudentDashboard({ token, name, onExplore, onOpenCourse, onLogou
     return () => controller.abort()
   }, [token])
 
+  const nextCourse = dashboard?.courses.find(course => course.status === 'ACTIVE' && course.requiredLessons > 0 && course.progressPercent < 100)
+
   return (
     <main className="dashboard-main" id="student-dashboard">
       <div className="container">
@@ -76,6 +78,24 @@ export function StudentDashboard({ token, name, onExplore, onOpenCourse, onLogou
                 <span className="stat-label">Concluídos</span>
               </div>
             </div>
+
+            {nextCourse && (
+              <section className="dashboard-continue" aria-labelledby="continue-course-heading">
+                <div>
+                  <span className="dashboard-continue-eyebrow">CONTINUE SUA JORNADA</span>
+                  <h2 id="continue-course-heading">{nextCourse.title}</h2>
+                  <p>{nextCourse.completedLessons} de {nextCourse.requiredLessons} aulas obrigatórias concluídas · {nextCourse.progressPercent}% de progresso</p>
+                  <div className="dashboard-progress-track" role="progressbar"
+                    aria-label={`Progresso de ${nextCourse.title}`}
+                    aria-valuemin={0} aria-valuemax={100} aria-valuenow={nextCourse.progressPercent}>
+                    <div style={{ width: `${nextCourse.progressPercent}%` }} />
+                  </div>
+                </div>
+                <button type="button" className="primary-btn" onClick={() => onOpenCourse(nextCourse.slug)}>
+                  {nextCourse.progressPercent === 0 ? 'Começar a estudar ↗' : 'Continuar estudando ↗'}
+                </button>
+              </section>
+            )}
 
             <div className="dashboard-section-header">
               <div>
